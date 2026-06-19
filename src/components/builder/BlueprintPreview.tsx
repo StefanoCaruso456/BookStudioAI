@@ -137,7 +137,7 @@ export function BlueprintPreview({
           {blueprint.chapterSummaries.map((c, i) => (
             <Card key={i} className="p-3.5">
               <div className="flex items-start gap-3">
-                <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-copper-soft text-xs font-semibold text-copper-dark">
+                <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-soft text-xs font-semibold text-brand-dark">
                   {i + 1}
                 </span>
                 <div className="min-w-0 flex-1 space-y-2">
@@ -167,7 +167,7 @@ export function BlueprintPreview({
       </div>
 
       {/* next steps + actions */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-line bg-copper-soft/40 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-2xl border border-line bg-brand-soft/40 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="font-semibold tracking-tight">Ready to start writing?</h3>
           <p className="text-sm text-subtle">
@@ -203,7 +203,7 @@ function MetaField({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5 text-sm font-medium text-subtle">
-        <Icon className="h-4 w-4 text-copper" />
+        <Icon className="h-4 w-4 text-brand" />
         {label}
       </div>
       {children}
@@ -237,14 +237,14 @@ function OptionList({
               className={cn(
                 "flex w-full items-center gap-2.5 rounded-xl border bg-card px-3.5 py-2.5 text-left text-sm transition-all",
                 chosen
-                  ? "border-copper ring-2 ring-copper/20"
-                  : "border-line hover:border-copper/40"
+                  ? "border-brand ring-2 ring-brand/20"
+                  : "border-line hover:border-brand/40"
               )}
             >
               <span
                 className={cn(
                   "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
-                  chosen ? "border-copper bg-copper text-white" : "border-line"
+                  chosen ? "border-brand bg-brand text-white" : "border-line"
                 )}
               >
                 {chosen && <Check className="h-2.5 w-2.5" />}

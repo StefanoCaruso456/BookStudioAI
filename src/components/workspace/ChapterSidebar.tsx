@@ -7,7 +7,7 @@ import type { Chapter } from "@/types/book";
 
 const STATUS_DOT: Record<Chapter["status"], string> = {
   not_started: "bg-line",
-  drafting: "bg-copper",
+  drafting: "bg-brand",
   needs_review: "bg-amber-400",
   complete: "bg-emerald-500",
 };
@@ -64,7 +64,7 @@ export function ChapterSidebar({
             onClick={() => onSelect(c.id)}
             className={cn(
               "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
-              c.id === selectedId ? "bg-copper-soft text-ink" : "hover:bg-canvas"
+              c.id === selectedId ? "bg-brand-soft text-ink" : "hover:bg-canvas"
             )}
           >
             <span className="w-5 shrink-0 text-center text-xs font-medium text-subtle">
@@ -79,9 +79,9 @@ export function ChapterSidebar({
       <div className="border-t border-line p-3">
         <Link
           href={`/project/${projectId}/publishing`}
-          className="flex items-center justify-center gap-2 rounded-xl border border-line bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:border-copper/40 hover:bg-copper-soft/40"
+          className="flex items-center justify-center gap-2 rounded-xl border border-line bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:border-brand/40 hover:bg-brand-soft/40"
         >
-          <Rocket className="h-4 w-4 text-copper" />
+          <Rocket className="h-4 w-4 text-brand" />
           Publishing kit
         </Link>
       </div>

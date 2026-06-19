@@ -16,9 +16,9 @@ export function PromptBar({
 }) {
   return (
     <div className={cn("w-full", className)}>
-      <div className="flex flex-col gap-2 rounded-2xl border border-line bg-card p-2 shadow-card sm:flex-row sm:items-center sm:gap-2 focus-within:border-copper/50 focus-within:ring-2 focus-within:ring-copper/15">
+      <div className="flex flex-col gap-2 rounded-2xl border border-line bg-card p-2 shadow-card sm:flex-row sm:items-center sm:gap-2 focus-within:border-brand/50 focus-within:ring-2 focus-within:ring-brand/15">
         <div className="flex flex-1 items-center gap-2 px-2">
-          <Sparkles className="h-4 w-4 shrink-0 text-copper" />
+          <Sparkles className="h-4 w-4 shrink-0 text-brand" />
           <input
             value={value}
             onChange={(e) => onChange(e.target.value)}

@@ -37,11 +37,11 @@ export function PricingCards() {
           key={plan.name}
           className={cn(
             "relative flex flex-col rounded-2xl border bg-card p-6 shadow-card",
-            plan.highlight ? "border-copper ring-1 ring-copper/20" : "border-line"
+            plan.highlight ? "border-brand ring-1 ring-brand/20" : "border-line"
           )}
         >
           {plan.highlight && (
-            <span className="absolute -top-3 left-6 rounded-full bg-copper px-3 py-1 text-xs font-semibold text-white">
+            <span className="absolute -top-3 left-6 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white">
               Most popular
             </span>
           )}
@@ -54,7 +54,7 @@ export function PricingCards() {
           <ul className="mt-5 space-y-2.5">
             {plan.features.map((f) => (
               <li key={f} className="flex items-center gap-2.5 text-sm">
-                <Check className="h-4 w-4 shrink-0 text-copper" />
+                <Check className="h-4 w-4 shrink-0 text-brand" />
                 {f}
               </li>
             ))}

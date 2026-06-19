@@ -31,7 +31,7 @@ export function StepProgress({
               <span
                 className={cn(
                   "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-colors",
-                  done && "bg-copper text-white",
+                  done && "bg-brand text-white",
                   active && "bg-ink text-white",
                   !done && !active && "bg-line/60 text-subtle"
                 )}
@@ -51,7 +51,7 @@ export function StepProgress({
               <div
                 className={cn(
                   "h-px flex-1 transition-colors",
-                  done ? "bg-copper/50" : "bg-line"
+                  done ? "bg-brand/50" : "bg-line"
                 )}
               />
             )}

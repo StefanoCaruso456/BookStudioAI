@@ -21,14 +21,14 @@ export function BookGoalSelector({
             type="button"
             onClick={() => onChange(goal.value)}
             className={cn(
-              "flex items-start gap-3 rounded-xl border bg-card p-4 text-left transition-all hover:border-copper/40",
-              selected ? "border-copper ring-2 ring-copper/20" : "border-line"
+              "flex items-start gap-3 rounded-xl border bg-card p-4 text-left transition-all hover:border-brand/40",
+              selected ? "border-brand ring-2 ring-brand/20" : "border-line"
             )}
           >
             <span
               className={cn(
                 "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors",
-                selected ? "border-copper bg-copper text-white" : "border-line"
+                selected ? "border-brand bg-brand text-white" : "border-line"
               )}
             >
               {selected && <Check className="h-3 w-3" />}

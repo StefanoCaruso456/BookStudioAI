@@ -50,7 +50,7 @@ export function AIActionPanel({
   return (
     <div className="rounded-2xl border border-line bg-card p-4">
       <div className="flex items-center gap-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-copper-soft text-copper-dark">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-soft text-brand-dark">
           <Sparkles className="h-4 w-4" />
         </span>
         <h3 className="text-sm font-semibold">AI assistant</h3>

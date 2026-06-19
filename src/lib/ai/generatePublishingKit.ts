@@ -61,7 +61,7 @@ function coverConcepts(type: string, title: string): string[] {
     cookbook: [
       `Warm overhead photo of a finished dish on a rustic table, serif title "${title}" at top`,
       `Minimal cream cover with a single hand-drawn ingredient illustration and elegant typography`,
-      `Bold editorial layout with a close-up food texture and a copper accent band`,
+      `Bold editorial layout with a close-up food texture and a brand accent band`,
     ],
     fitness_diet: [
       `High-energy athletic photo with a strong sans-serif title and a bold accent color`,

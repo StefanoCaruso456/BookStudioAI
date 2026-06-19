@@ -20,7 +20,7 @@ export function EditingToolbar({
   return (
     <div className="rounded-2xl border border-line bg-card p-4">
       <div className="flex items-center gap-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-copper-soft text-copper-dark">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-soft text-brand-dark">
           <PenTool className="h-4 w-4" />
         </span>
         <h3 className="text-sm font-semibold">Editing modes</h3>
@@ -39,7 +39,7 @@ export function EditingToolbar({
             {busyMode === mode ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <span className="h-1.5 w-1.5 rounded-full bg-copper" />
+              <span className="h-1.5 w-1.5 rounded-full bg-brand" />
             )}
             {editModeLabel(mode)}
           </Button>
@@ -47,8 +47,8 @@ export function EditingToolbar({
       </div>
 
       {suggestion && (
-        <div className="mt-3 rounded-xl border border-copper/30 bg-copper-soft/40 p-3">
-          <div className="text-xs font-semibold text-copper-dark">
+        <div className="mt-3 rounded-xl border border-brand/30 bg-brand-soft/40 p-3">
+          <div className="text-xs font-semibold text-brand-dark">
             {editModeLabel(suggestion.mode)} suggestion
           </div>
           <p className="mt-1 text-xs leading-relaxed text-ink/80">

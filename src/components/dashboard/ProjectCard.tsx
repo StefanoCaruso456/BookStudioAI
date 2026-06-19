@@ -29,7 +29,7 @@ export function ProjectCard({
   return (
     <div className="group flex flex-col rounded-2xl border border-line bg-card p-5 shadow-card transition-shadow hover:shadow-lift">
       <div className="flex items-start justify-between gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-copper-soft text-copper-dark">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand-dark">
           <BookText className="h-5 w-5" />
         </span>
         <button
@@ -72,7 +72,7 @@ export function ProjectCard({
         </span>
         <Link
           href={`/project/${project.id}`}
-          className="inline-flex items-center gap-1 text-sm font-medium text-copper-dark transition-colors hover:text-copper"
+          className="inline-flex items-center gap-1 text-sm font-medium text-brand-dark transition-colors hover:text-brand"
         >
           Continue
           <ArrowRight className="h-4 w-4" />

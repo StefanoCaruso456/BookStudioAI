@@ -7,25 +7,30 @@ const config: Config = {
       colors: {
         canvas: "#FAFAF7", // warm white background
         ink: "#111111", // primary text
-        subtle: "#5F5F5F", // secondary text
+        subtle: "#5B5B5B", // secondary text
         card: "#FFFFFF",
         line: "#E7E3DA", // border
-        copper: {
-          DEFAULT: "#C47A3A", // accent
-          dark: "#9A5827",
-          soft: "#F6E9DC", // soft accent background
+        // Modern Editorial — "Book Studio Ink"
+        brand: {
+          DEFAULT: "#2F4A5A", // deep editorial slate-blue
+          dark: "#243B48", // hover / emphasis
+          muted: "#6E8796", // muted brand
+          soft: "#EEF3F6", // soft highlight background
         },
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        heading: ["var(--font-heading)", "var(--font-inter)", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        xl: "0.875rem",
-        "2xl": "1.125rem",
+        lg: "0.625rem", // 10px
+        xl: "0.75rem", // 12px
+        "2xl": "1rem", // 16px
       },
       boxShadow: {
-        card: "0 1px 2px rgba(17,17,17,0.04), 0 8px 24px -12px rgba(17,17,17,0.10)",
-        lift: "0 2px 4px rgba(17,17,17,0.05), 0 16px 40px -16px rgba(17,17,17,0.18)",
+        // published-manuscript, not crypto-dashboard
+        card: "0 1px 3px rgba(17,17,17,0.05)",
+        lift: "0 1px 3px rgba(17,17,17,0.05), 0 12px 28px -14px rgba(17,17,17,0.14)",
       },
       maxWidth: {
         content: "72rem",

@@ -44,7 +44,7 @@ export default function HomePage() {
               className="rounded-2xl border border-line bg-card p-6 shadow-card"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-copper-soft text-copper-dark">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand-dark">
                   <s.icon className="h-5 w-5" />
                 </span>
                 <span className="text-sm font-semibold text-subtle">

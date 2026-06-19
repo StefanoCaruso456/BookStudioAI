@@ -27,17 +27,17 @@ export function LandingHero() {
       {/* soft ambient background */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 -top-40 h-96 bg-gradient-to-b from-copper-soft/60 to-transparent blur-2xl"
+        className="pointer-events-none absolute inset-x-0 -top-40 h-96 bg-gradient-to-b from-brand-soft/60 to-transparent blur-2xl"
       />
       <div className="relative mx-auto max-w-content px-5 pb-8 pt-16 sm:px-8 sm:pt-24">
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1 text-xs font-medium text-subtle shadow-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-copper" />
+            <span className="h-1.5 w-1.5 rounded-full bg-brand" />
             Turn Content Into Books
           </span>
           <h1 className="mt-5 text-balance text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
             Turn Your Content Into a{" "}
-            <span className="text-copper">Published Book</span>
+            <span className="text-brand">Published Book</span>
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-balance text-lg text-subtle">
             Book Studio AI helps creators, coaches, chefs, and experts transform
@@ -77,7 +77,7 @@ export function LandingHero() {
               type="button"
               onClick={() => startBuilder(getGenre("other"))}
               className={cn(
-                "inline-flex items-center gap-2 rounded-xl border border-dashed border-line bg-card/60 px-4 py-2.5 text-sm font-medium text-subtle transition-colors hover:border-copper/40 hover:text-ink"
+                "inline-flex items-center gap-2 rounded-xl border border-dashed border-line bg-card/60 px-4 py-2.5 text-sm font-medium text-subtle transition-colors hover:border-brand/40 hover:text-ink"
               )}
             >
               <Plus className="h-4 w-4" />

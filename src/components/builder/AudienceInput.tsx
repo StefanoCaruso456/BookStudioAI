@@ -28,7 +28,7 @@ export function AudienceInput({
               key={ex}
               type="button"
               onClick={() => onChange(ex)}
-              className="rounded-full border border-line bg-card px-3 py-1.5 text-sm text-subtle transition-colors hover:border-copper/40 hover:text-ink"
+              className="rounded-full border border-line bg-card px-3 py-1.5 text-sm text-subtle transition-colors hover:border-brand/40 hover:text-ink"
             >
               {ex}
             </button>

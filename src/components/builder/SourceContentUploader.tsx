@@ -74,7 +74,7 @@ export function SourceContentUploader({ hint }: { hint: string }) {
             className={cn(
               "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors",
               activeTab === t.type
-                ? "border-copper bg-copper-soft text-copper-dark"
+                ? "border-brand bg-brand-soft text-brand-dark"
                 : "border-line bg-card text-subtle hover:text-ink"
             )}
           >
@@ -121,7 +121,7 @@ export function SourceContentUploader({ hint }: { hint: string }) {
                 key={s.id}
                 className="flex items-center gap-3 rounded-xl border border-line bg-card px-3.5 py-2.5"
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-copper-soft text-copper-dark">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand-dark">
                   <meta.icon className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">

@@ -89,8 +89,11 @@ docs/PRESEARCH.md          # product engineering / stack rationale
 
 ## Design system
 
-Editorial, premium, calm. Warm white canvas `#FAFAF7`, near-black ink `#111111`,
-warm-copper accent `#C47A3A`, soft rounded cards, minimal shadows.
+**Modern Editorial** — premium, calm, publishing-grade (think Notion × Substack ×
+Apple Books, not a neon AI tool). Warm white canvas `#FAFAF7`, near-black ink
+`#111111`, deep editorial slate-blue brand `#2F4A5A` with a soft `#EEF3F6`
+highlight, borders `#E7E3DA`. Geist Sans headings + Inter body, 12–16px radii,
+whisper-light shadows, and elegant monochrome line icons.
 
 ---
 

@@ -123,7 +123,7 @@ export function PublishingKit({ projectId }: { projectId: string }) {
 
       {!kit ? (
         <Card className="mt-8 p-8 text-center">
-          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-copper-soft text-copper-dark">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-brand-soft text-brand-dark">
             <Sparkles className="h-6 w-6" />
           </span>
           <h2 className="mt-4 text-lg font-semibold">Generate your publishing kit</h2>
@@ -200,7 +200,7 @@ export function PublishingKit({ projectId }: { projectId: string }) {
                 {kit.keywords.map((k) => (
                   <span
                     key={k}
-                    className="rounded-full bg-copper-soft px-2.5 py-0.5 text-xs font-medium text-copper-dark"
+                    className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-medium text-brand-dark"
                   >
                     {k}
                   </span>
@@ -212,7 +212,7 @@ export function PublishingKit({ projectId }: { projectId: string }) {
               <ul className="space-y-1.5 text-sm">
                 {kit.categorySuggestions.map((c) => (
                   <li key={c} className="flex items-start gap-2">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-copper" />
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
                     {c}
                   </li>
                 ))}
@@ -259,7 +259,7 @@ export function PublishingKit({ projectId }: { projectId: string }) {
                       className={cn(
                         "flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors",
                         item.done
-                          ? "border-copper bg-copper text-white"
+                          ? "border-brand bg-brand text-white"
                           : "border-line"
                       )}
                     >
@@ -302,7 +302,7 @@ function Section({
   return (
     <Card className="p-5">
       <div className="mb-3 flex items-center gap-2">
-        {Icon && <Icon className="h-4 w-4 text-copper" />}
+        {Icon && <Icon className="h-4 w-4 text-brand" />}
         <h3 className="font-semibold tracking-tight">{title}</h3>
       </div>
       {children}

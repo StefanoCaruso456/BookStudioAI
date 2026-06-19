@@ -19,7 +19,7 @@ export function Badge({
 
 const STATUS_STYLES: Record<ChapterStatus, string> = {
   not_started: "bg-line/40 text-subtle",
-  drafting: "bg-copper-soft text-copper-dark",
+  drafting: "bg-brand-soft text-brand-dark",
   needs_review: "bg-amber-100 text-amber-700",
   complete: "bg-emerald-100 text-emerald-700",
 };

@@ -72,7 +72,7 @@ export function ChapterEditor({
         value={chapter.content}
         onChange={(e) => onChangeContent(e.target.value)}
         placeholder="Start writing, or use the AI assistant to generate a first draft…"
-        className="mt-4 min-h-[320px] flex-1 resize-none rounded-2xl border border-line bg-card p-5 font-sans text-[15px] leading-7 text-ink placeholder:text-subtle/60 focus:border-copper/50 focus:outline-none focus:ring-2 focus:ring-copper/15"
+        className="mt-4 min-h-[320px] flex-1 resize-none rounded-2xl border border-line bg-card p-5 font-sans text-[15px] leading-7 text-ink placeholder:text-subtle/60 focus:border-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/15"
       />
     </div>
   );

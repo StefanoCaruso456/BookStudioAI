@@ -109,7 +109,7 @@ export function BookBuilderWizard() {
 
       <Card className="overflow-hidden">
         <div className="border-b border-line bg-canvas/40 px-6 py-5">
-          <div className="flex items-center gap-2 text-sm font-medium text-copper">
+          <div className="flex items-center gap-2 text-sm font-medium text-brand">
             <Sparkles className="h-4 w-4" />
             Step {step + 1} of {STEPS.length}
           </div>
@@ -220,7 +220,7 @@ const STEP_HINTS: ((genre: string) => string)[] = [
 function BlueprintLoading() {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 rounded-xl border border-line bg-copper-soft/40 px-4 py-3 text-sm text-copper-dark">
+      <div className="flex items-center gap-3 rounded-xl border border-line bg-brand-soft/40 px-4 py-3 text-sm text-brand-dark">
         <Loader2 className="h-4 w-4 animate-spin" />
         Building your blueprint from everything you shared…
       </div>

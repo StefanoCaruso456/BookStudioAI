@@ -21,7 +21,7 @@ export default function DashboardPage() {
         </div>
       ) : projects.length === 0 ? (
         <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-card/50 px-6 py-16 text-center">
-          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-copper-soft text-copper-dark">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft text-brand-dark">
             <BookPlus className="h-7 w-7" />
           </span>
           <h2 className="mt-5 text-xl font-semibold tracking-tight">

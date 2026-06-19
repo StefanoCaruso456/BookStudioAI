@@ -53,7 +53,7 @@ export function SubscriptionGate({ onClose }: { onClose: () => void }) {
         >
           <X className="h-4 w-4" />
         </button>
-        <div className="flex items-center gap-2 text-copper">
+        <div className="flex items-center gap-2 text-brand">
           <Sparkles className="h-5 w-5" />
           <span className="text-sm font-semibold">Unlock the full studio</span>
         </div>
@@ -70,7 +70,7 @@ export function SubscriptionGate({ onClose }: { onClose: () => void }) {
             <div
               key={p.plan}
               className={`flex flex-col rounded-xl border p-4 ${
-                p.highlight ? "border-copper ring-1 ring-copper/20" : "border-line"
+                p.highlight ? "border-brand ring-1 ring-brand/20" : "border-line"
               }`}
             >
               <div className="text-sm font-medium text-subtle">{p.name}</div>
@@ -81,7 +81,7 @@ export function SubscriptionGate({ onClose }: { onClose: () => void }) {
               <ul className="mt-3 flex-1 space-y-1.5">
                 {p.features.map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm">
-                    <Check className="h-3.5 w-3.5 shrink-0 text-copper" />
+                    <Check className="h-3.5 w-3.5 shrink-0 text-brand" />
                     {f}
                   </li>
                 ))}
