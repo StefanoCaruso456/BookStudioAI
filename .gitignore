@@ -29,3 +29,5 @@ next-env.d.ts
 
 # drizzle
 /drizzle
+
+# CI pipeline verified 2026-06-19
