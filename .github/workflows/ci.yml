@@ -2,7 +2,7 @@ name: CI
 
 # Quality gate that runs on every PR and on pushes to main.
 # Vercel handles the actual deploy (preview on PRs, production on main).
-# This workflow just makes sure the code type-checks and builds before that.
+# This workflow just makes sure the code type-checks, tests, and builds before that.
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    name: Typecheck & build
+    name: Typecheck, test & build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,6 +29,9 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Test
+        run: npm test
 
       - name: Build
         run: npm run build
