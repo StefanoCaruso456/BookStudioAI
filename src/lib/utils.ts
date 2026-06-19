@@ -14,8 +14,12 @@ export function nowIso(): string {
 }
 
 export function formatDate(iso: string): string {
+  const date = new Date(iso);
+  // Invalid dates don't throw from toLocaleDateString — they stringify to
+  // "Invalid Date" — so guard explicitly to honour the empty-string fallback.
+  if (Number.isNaN(date.getTime())) return "";
   try {
-    return new Date(iso).toLocaleDateString(undefined, {
+    return date.toLocaleDateString(undefined, {
       month: "short",
       day: "numeric",
       year: "numeric",
