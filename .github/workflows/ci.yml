@@ -1,13 +1,11 @@
 name: CI
 
-# Quality gate that runs on every PR and on pushes to main.
-# Vercel handles the actual deploy (preview on PRs, production on main).
-# This workflow just makes sure the code type-checks, tests, and builds before that.
+# Quality gate for pull requests targeting main.
+# Production deploys to Vercel run from deploy.yml (on push to main), which
+# re-runs typecheck + tests before deploying, so we don't duplicate that here.
 
 on:
   pull_request:
-    branches: [main]
-  push:
     branches: [main]
 
 jobs:
