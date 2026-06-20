@@ -6,6 +6,8 @@
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* offset anchor jumps so the fixed header doesn't cover section tops */
+    scroll-padding-top: 4.5rem;
   }
   body {
     @apply bg-canvas text-ink;

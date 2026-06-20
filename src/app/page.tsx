@@ -14,7 +14,7 @@ import { MobileCTABar } from "@/components/marketing/MobileCTABar";
 
 export default function HomePage() {
   return (
-    <main className="overflow-x-hidden">
+    <main className="overflow-x-hidden pb-20 md:pb-0">
       <Hero />
       <NarrativeConverge />
       <BlueprintBuild />
