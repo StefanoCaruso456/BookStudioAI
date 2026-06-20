@@ -1,11 +1,27 @@
 import type { Metadata } from "next";
+import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 
+// Self-hosted via next/font — no render-blocking <link>, no layout shift.
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800", "900"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Book Studio AI — Turn Your Content Into a Published Book",
+  title: "Book Studio AI — Turn Years of Knowledge Into a Published Book",
   description:
-    "Book Studio AI helps creators, coaches, chefs, and experts transform their ideas, notes, videos, recipes, and content into professionally structured books.",
+    "Transform your notes, documents, recipes, podcasts, newsletters, and expertise into a professionally written, publish-ready book.",
 };
 
 export default function RootLayout({
@@ -14,16 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head>
-        {/* Inter loaded at runtime; system stack used as fallback so builds need no network */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <body className="font-sans antialiased">
         <SiteHeader />
         {children}

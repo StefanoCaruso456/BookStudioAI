@@ -3,11 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --font-inter: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-      Roboto, Helvetica, Arial, sans-serif;
-    --font-heading: "Geist", "Inter Tight", var(--font-inter);
-  }
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -15,31 +10,72 @@
   body {
     @apply bg-canvas text-ink;
   }
-  /* Editorial headings — Geist Sans, tight tracking */
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-family: var(--font-heading);
-    letter-spacing: -0.018em;
-  }
   ::selection {
-    background-color: #eef3f6;
-    color: #111111;
+    background-color: #4f46e5;
+    color: #ffffff;
   }
 }
 
 @layer utilities {
-  .font-heading {
-    font-family: var(--font-heading);
+  /* Playfair Display — applied per-element on the marketing site, not globally,
+     so app UI headings keep their sans typography. */
+  .font-display {
+    font-family: var(--font-playfair), Georgia, serif;
   }
   .text-balance {
     text-wrap: balance;
   }
-  /* hide native number spinners for cleaner editorial inputs */
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  /* Signature gradient as text fill */
+  .text-gradient {
+    background-image: linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #818cf8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-gradient-anim {
+    background-image: linear-gradient(
+      120deg,
+      #4f46e5 0%,
+      #818cf8 25%,
+      #6366f1 50%,
+      #818cf8 75%,
+      #4f46e5 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    @apply animate-shimmer;
+  }
+  .bg-grid {
+    background-image: linear-gradient(rgba(79, 70, 229, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79, 70, 229, 0.05) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+  .perspective {
+    perspective: 1600px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+  }
+}
+
+/* Respect users who prefer less motion — kill non-essential animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
