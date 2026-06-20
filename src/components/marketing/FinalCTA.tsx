@@ -1,38 +1,57 @@
-"use client";
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Reveal } from "./Reveal";
+import { Reveal } from "@/components/marketing/primitives/Reveal";
+import { GradientText } from "@/components/marketing/primitives/GradientText";
+import { CTAButton } from "@/components/marketing/primitives/CTAButton";
 
+/** Dark, dramatic closing call-to-action section. */
 export function FinalCTA() {
   return (
-    <section className="px-5 py-10 sm:px-8 sm:py-16">
-      <div className="relative mx-auto max-w-content overflow-hidden rounded-[1.75rem] bg-brand px-6 py-20 text-center sm:py-28">
-        {/* soft accent glow */}
-        <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-[34rem] max-w-full -translate-x-1/2 rounded-[50%] bg-accent/25 blur-3xl" />
-        {/* faint keyline frame */}
-        <div className="pointer-events-none absolute inset-4 rounded-[1.4rem] border border-white/10" />
+    <section className="relative overflow-hidden bg-midnight py-28 sm:py-40">
+      {/* Radial glow layer */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-midnight-glow"
+      />
 
-        <Reveal className="relative">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-soft/90">
-            Book Studio AI
-          </p>
-          <h2 className="mx-auto mt-4 max-w-3xl text-balance font-heading text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-6xl">
-            Your First Book Starts Today.
-          </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-balance text-lg text-white/70">
-            Turn your knowledge, stories, recipes, frameworks, and experiences into
-            a professionally published book.
-          </p>
-          <div className="mt-9">
-            <Link
-              href="/builder"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-accent px-7 text-base font-semibold text-white shadow-lift transition-colors hover:bg-accent-dark"
-            >
-              Start My Book
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </Reveal>
+      <div className="relative mx-auto max-w-content px-5 sm:px-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <Reveal>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-glow">
+              Your turn
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.08}>
+            <h2 className="mt-5 font-display text-4xl leading-[1.1] text-white text-balance sm:text-6xl">
+              Your book is already{" "}
+              <GradientText animate>inside you.</GradientText>
+            </h2>
+          </Reveal>
+
+          <Reveal delay={0.16}>
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-white/70 text-pretty">
+              Bring what you already know. We'll shape it into a blueprint, draft
+              every chapter in your voice, and ready it for the world.
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.24}>
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <CTAButton href="/builder" variant="primary" size="lg">
+                Start Your Book
+                <ArrowRight aria-hidden className="h-4 w-4" />
+              </CTAButton>
+              <CTAButton
+                href="#how-it-works"
+                variant="secondary"
+                size="lg"
+                onDark
+              >
+                See How It Works
+              </CTAButton>
+            </div>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
