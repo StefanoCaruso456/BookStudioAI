@@ -1,98 +1,127 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { PromptBar } from "@/components/landing/PromptBar";
-import { Book3D } from "./BookCover";
-import { useStore } from "@/lib/store";
-import { EASE_OUT } from "@/lib/motion";
+import { ArrowRight, Sparkles } from "lucide-react";
+import { CTAButton } from "./primitives/CTAButton";
+import { GradientText } from "./primitives/GradientText";
+import { ContentChip } from "./primitives/ContentChip";
+import { Book3D } from "./primitives/Book3D";
+import { CONTENT_ITEMS } from "@/lib/marketing";
+
+// Chips positioned around the floating book (desktop).
+const CHIP_POS = [
+  "left-[-6%] top-[12%]",
+  "right-[-8%] top-[6%]",
+  "left-[-10%] top-[54%]",
+  "right-[-6%] top-[48%]",
+  "left-[8%] top-[88%]",
+  "right-[12%] top-[90%]",
+];
 
 export function Hero() {
-  const router = useRouter();
   const reduce = useReducedMotion();
-  const setDraft = useStore((s) => s.setDraft);
-  const resetDraft = useStore((s) => s.resetDraft);
-  const [prompt, setPrompt] = useState("");
-
-  function start() {
-    resetDraft("cookbook");
-    setDraft({ bookType: "cookbook", initialPrompt: prompt });
-    router.push("/builder");
-  }
-
-  const fade = {
-    hidden: { opacity: 0, y: reduce ? 0 : 22 },
-    show: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.7, ease: EASE_OUT, delay: 0.05 * i },
-    }),
-  };
 
   return (
-    <section className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-x-0 -top-32 h-[26rem] bg-gradient-to-b from-accent-soft/50 to-transparent" />
-      <div className="relative mx-auto grid max-w-content items-center gap-12 px-5 pb-20 pt-16 sm:px-8 sm:pt-24 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:pt-28">
+    <section className="relative overflow-hidden bg-canvas pt-28 pb-20 sm:pt-36 sm:pb-28">
+      {/* ambient background */}
+      <div aria-hidden className="absolute inset-0 bg-grid opacity-60" />
+      <div
+        aria-hidden
+        className="absolute left-1/2 top-0 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-indigo/20 blur-[120px]"
+      />
+
+      <div className="relative mx-auto grid max-w-content items-center gap-14 px-5 sm:px-8 lg:grid-cols-[1.05fr_0.95fr]">
         {/* copy */}
         <div className="text-center lg:text-left">
-          <motion.span
-            custom={0}
-            variants={fade}
-            initial="hidden"
-            animate="show"
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1 text-xs font-medium text-subtle shadow-sm"
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-white/70 px-4 py-1.5 text-sm text-subtle shadow-soft backdrop-blur"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            A guided publishing studio
-          </motion.span>
+            <Sparkles className="h-3.5 w-3.5 text-indigo" />
+            A guided publishing studio — not a chatbot
+          </motion.div>
 
           <motion.h1
-            custom={1}
-            variants={fade}
-            initial="hidden"
-            animate="show"
-            className="mt-5 text-balance text-[2.6rem] font-extrabold leading-[1.04] tracking-tight sm:text-6xl"
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            className="font-display mt-6 text-balance text-5xl font-bold leading-[1.04] tracking-tight text-ink sm:text-6xl lg:text-7xl"
           >
-            Turn Your Content Into a{" "}
-            <span className="text-accent">Published Book</span>
+            Turn Years of Knowledge Into a{" "}
+            <GradientText animate>Published Book</GradientText>
           </motion.h1>
 
           <motion.p
-            custom={2}
-            variants={fade}
-            initial="hidden"
-            animate="show"
-            className="mx-auto mt-6 max-w-xl text-balance text-lg leading-relaxed text-subtle lg:mx-0"
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="mx-auto mt-6 max-w-xl text-pretty text-lg leading-relaxed text-subtle lg:mx-0"
           >
-            Book Studio AI helps creators, chefs, coaches, and experts transform
-            their knowledge into professionally structured books.
+            Transform notes, documents, recipes, podcasts, newsletters, and
+            expertise into a professionally written book — structured, drafted,
+            and ready to publish.
           </motion.p>
 
           <motion.div
-            custom={3}
-            variants={fade}
-            initial="hidden"
-            animate="show"
-            className="mx-auto mt-8 max-w-xl lg:mx-0"
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-9 flex flex-col items-center gap-3 sm:flex-row lg:justify-start"
           >
-            <PromptBar value={prompt} onChange={setPrompt} onSubmit={start} />
+            <CTAButton href="/builder" size="lg">
+              Start Your Book
+              <ArrowRight className="h-4 w-4" />
+            </CTAButton>
+            <CTAButton href="#how-it-works" variant="secondary" size="lg">
+              See How It Works
+            </CTAButton>
           </motion.div>
         </div>
 
-        {/* hero book */}
-        <motion.div
-          initial={{ opacity: 0, scale: reduce ? 1 : 0.92, y: reduce ? 0 : 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: EASE_OUT, delay: 0.2 }}
-          className="mx-auto w-full max-w-[19rem] sm:max-w-[21rem]"
-        >
-          <Book3D
-            title="Nonna's Italian Kitchen"
-            eyebrow="Recipes & Family Stories"
-            author="Maria Conti"
-            color="#B97845"
-          />
-        </motion.div>
+        {/* living book */}
+        <div className="relative mx-auto h-[420px] w-full max-w-md sm:h-[480px]">
+          <motion.div
+            className="perspective absolute inset-0 flex items-center justify-center"
+            animate={reduce ? undefined : { y: [0, -14, 0] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div
+              className="h-[340px] w-[250px] sm:h-[380px] sm:w-[280px]"
+              style={{ transform: "rotateY(-22deg) rotateX(6deg)" }}
+            >
+              <Book3D
+                title="Your Story, Structured"
+                subtitle="Book Studio AI"
+                cover="from-indigo to-indigo-deep"
+                spine="bg-indigo-deep"
+                className="h-full w-full"
+              />
+            </div>
+          </motion.div>
+
+          {/* drifting content chips */}
+          {CONTENT_ITEMS.slice(0, 6).map((item, i) => (
+            <motion.div
+              key={item.label}
+              className={`absolute hidden lg:block ${CHIP_POS[i]}`}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 + i * 0.12 }}
+            >
+              <motion.div
+                animate={reduce ? undefined : { y: [0, i % 2 ? 10 : -10, 0] }}
+                transition={{
+                  duration: 5 + i,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <ContentChip icon={item.icon} label={item.label} />
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
