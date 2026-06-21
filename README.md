@@ -1,100 +1,129 @@
 # Book Studio AI
 
-**Turn Content Into Books.**
+> Turn years of knowledge into a published book.
 
-Book Studio AI helps creators, chefs, coaches, fitness professionals, doctors,
-travel creators, founders, and experts turn their content, knowledge, and life
-experiences into professionally structured books — through a guided publishing
-studio, not a generic chatbot.
+Book Studio AI is a guided **publishing studio** — not a chatbot — that turns a
+creator's raw material (notes, documents, recipes, podcasts, newsletters,
+expertise) into a professionally structured, publish-ready book. Built for
+creators, coaches, chefs, consultants, founders, and experts.
 
----
+Working end-to-end MVP, deployed to production. AI generation is live; data
+persistence is client-side for now (see [Roadmap](#roadmap)).
 
-## What's in this MVP
+## How it works
 
-A complete, runnable end-to-end flow:
-
-1. **Landing page** → prompt bar + six genre tiles (`/`)
-2. **Book Builder Wizard** → book type → goal → audience → source content →
-   genre-specific details → AI blueprint (`/builder`)
-3. **Blueprint** → titles, subtitles, promise, tone, editable table of contents;
-   approve to create chapters
-4. **Chapter workspace** → sidebar TOC, editor, AI assistant, editing modes,
-   chapter statuses (`/project/[id]`)
-5. **Publishing kit** → title, bio, description, back-cover copy, keywords,
-   categories, cover concepts, KDP checklist, export placeholders
-   (`/project/[id]/publishing`)
-6. **Dashboard** → manage and continue projects (`/dashboard`)
-7. **Subscription gate** → pricing + upgrade modal (placeholder, no real charge)
-
-### Runs with zero secrets
-
-The MVP persists to the browser (`localStorage`) and uses **placeholder AI
-functions** that produce genre-aware, professional output deterministically from
-your own inputs. No database, auth, or API keys are required to run it.
+1. **Landing** (`/`) — premium scroll-driven marketing site.
+2. **Builder wizard** (`/builder`) — book type → goal → audience → source
+   content → genre details → AI **blueprint**.
+3. **Blueprint** — title/subtitle options, promise, tone, and an editable table
+   of contents; approve it to generate chapters.
+4. **Chapter workspace** (`/project/[id]`) — TOC sidebar, editor, and an AI
+   assistant (draft, rewrite actions, edit passes) with per-chapter statuses.
+5. **Publishing kit** (`/project/[id]/publishing`) — author bio, description,
+   back-cover copy, keywords, categories, cover concepts, and a KDP checklist.
+6. **Dashboard** (`/dashboard`) to manage projects · **Pricing** (`/pricing`).
 
 ## Tech stack
 
-| Layer    | Choice                                   |
-| -------- | ---------------------------------------- |
-| Frontend | Next.js (App Router) + TypeScript        |
-| Styling  | Tailwind CSS + Lucide icons              |
-| State    | Zustand (localStorage persistence)       |
-| AI       | Placeholder layer in `src/lib/ai/*`      |
-| DB       | Drizzle schema in `src/lib/db/schema.ts` |
+| Layer       | Choice                                                              |
+| ----------- | ------------------------------------------------------------------ |
+| Framework   | Next.js 14 (App Router) · TypeScript (strict)                      |
+| Styling     | Tailwind CSS · Lucide icons                                         |
+| Animation   | Framer Motion · GSAP ScrollTrigger (marketing site)                |
+| State       | Zustand, persisted to `localStorage`                               |
+| AI          | Vercel AI SDK + OpenAI **gpt-4o** (server actions) + fallback      |
+| Data model  | Drizzle ORM schema (`src/lib/db/schema.ts`) — defined, not wired   |
+| Testing     | Vitest + Testing Library (76 tests)                                |
+| CI/CD       | GitHub Actions → Vercel (test-gated)                               |
 
 ## Getting started
 
 ```bash
 npm install
-npm run dev
-# open http://localhost:3000
+npm run dev          # http://localhost:3000
 ```
 
-Other scripts: `npm run build`, `npm run typecheck`, `npm run lint`.
+Runs with **zero secrets**: the AI layer falls back to deterministic,
+genre-aware output and state persists to the browser.
 
-## Wiring up real services (later)
+### Enable real AI (optional)
 
-Everything is structured so production services drop in without touching the UI.
-Copy `.env.example` → `.env.local` and fill in keys as you go.
+Copy `.env.example` → `.env.local` and set a server-side key:
 
-- **Database (Railway Postgres + Drizzle):** schema already lives in
-  `src/lib/db/schema.ts` and mirrors the store shapes. Set `DATABASE_URL`, run
-  `npm run db:push`, then replace the actions in `src/lib/store.ts` with server
-  actions that query these tables.
-- **Auth (Clerk):** wrap the app in `<ClerkProvider>`, add `/sign-in` and
-  `/sign-up`, protect `/dashboard`, `/builder`, and `/project/[id]`, and map the
-  Clerk user to the `users` table.
-- **AI (Vercel AI SDK → OpenAI/Anthropic):** each function in `src/lib/ai/*` has
-  a typed input/output contract. Swap the placeholder body for a real model call;
-  the components don't change.
-- **Payments (Stripe):** replace `setPlan` in
-  `src/components/common/SubscriptionGate.tsx` with a Stripe Checkout session.
+```bash
+OPENAI_API_KEY=sk-...   # server-side only — never prefix with NEXT_PUBLIC_
+```
+
+With a key present, all generation (blueprint, chapters, edits, publishing kit)
+runs on **gpt-4o**; without one, the deterministic fallback is used. The key is
+read on the server and never reaches the client.
+
+## Scripts
+
+| Script                              | Purpose                                  |
+| ----------------------------------- | ---------------------------------------- |
+| `npm run dev`                       | Development server                       |
+| `npm run build` / `npm start`       | Production build / serve                 |
+| `npm test` · `npm run test:watch`   | Vitest suite                             |
+| `npm run typecheck`                 | `tsc --noEmit`                           |
+| `npm run lint`                      | Next.js ESLint                           |
+| `npm run db:generate` · `db:push`   | Drizzle migrations (once `DATABASE_URL`) |
+
+## Architecture
+
+- **AI layer (`src/lib/ai/`)** — the public surface
+  (`generateBookBlueprint`, `generateChapterDraft`, `rewriteChapter`,
+  `editChapter`, `generatePublishingKit`) is exposed as **server actions**
+  (`actions.ts`). Each branches on `OPENAI_API_KEY`: present → gpt-4o
+  (`openai.ts`, server-only); absent or on error → deterministic placeholder.
+- **State (`src/lib/store.ts`)** — a Zustand store persisted to `localStorage`
+  is the current source of truth. Its action shapes mirror the Drizzle schema,
+  so swapping to Postgres + server actions later is a drop-in.
+- **Genres (`src/lib/genres.ts`)** — the "studio brain": each genre's sections,
+  audience hints, structured fields, and prompt flavor are config-driven.
+- **Design** — two intentional surfaces (brand rules live in
+  `.claude/skills/book-studio-design-system`):
+  - **Marketing** (`/`): premium **midnight + royal indigo + Playfair Display**,
+    scroll-driven with Framer Motion + GSAP.
+  - **In-app studio**: a calmer **editorial slate** palette with Inter.
 
 ## Project structure
 
 ```
 src/
-  app/                     # routes (landing, builder, project, publishing, dashboard, pricing)
+  app/                 # routes: / · /builder · /project/[id] · /project/[id]/publishing · /dashboard · /pricing
   components/
-    landing/  builder/  workspace/  publishing/  dashboard/  ui/  layout/  common/
+    marketing/         # scrollytelling landing (+ primitives/)
+    builder/ workspace/ publishing/ dashboard/   # the studio
+    ui/ layout/ common/
   lib/
-    ai/                    # placeholder AI functions + typed interfaces
-    db/schema.ts           # Drizzle schema (production data model)
-    genres.ts              # genre-specific config (the "studio" brain)
-    store.ts               # Zustand store (MVP source of truth)
-    utils.ts
-  types/book.ts            # core domain types
-docs/PRESEARCH.md          # product engineering / stack rationale
+    ai/                # server actions + OpenAI (gpt-4o) + deterministic fallback (+ tests)
+    db/schema.ts       # Drizzle schema (production data model)
+    genres.ts          # genre configuration
+    store.ts           # Zustand + localStorage (current source of truth)
+    utils.ts marketing.ts gsap.ts
+  types/book.ts        # core domain types
 ```
 
-## Design system
+## CI / CD
 
-**Modern Editorial** — premium, calm, publishing-grade (think Notion × Substack ×
-Apple Books, not a neon AI tool). Warm white canvas `#FAFAF7`, near-black ink
-`#111111`, deep editorial slate-blue brand `#2F4A5A` with a soft `#EEF3F6`
-highlight, borders `#E7E3DA`. Geist Sans headings + Inter body, 12–16px radii,
-whisper-light shadows, and elegant monochrome line icons.
+- **`.github/workflows/ci.yml`** — on every PR to `main`:
+  `typecheck → test → build`.
+- **`.github/workflows/deploy.yml`** — on push to `main`: re-runs
+  `typecheck → test`, then `vercel build` + `vercel deploy --prod`. A failing
+  test blocks the deploy, and the outcome is visible in the Actions tab.
+  Requires the `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` repo secrets.
+- **`vercel.json`** disables Vercel's native `main` auto-deploy so it doesn't
+  race the Actions deploy. PR preview deploys are unaffected.
+
+## Roadmap
+
+- **Persistence** — set `DATABASE_URL` (Railway Postgres) and replace the store
+  actions with server actions over the existing Drizzle schema.
+- **Auth** — Google sign-in, mapped to the `users` table.
+- **Payments** — Stripe checkout behind the subscription gate.
+- **Streaming** — stream gpt-4o output token-by-token in the wizard and editor.
 
 ---
 
-© 2026 Book Studio AI.
+© 2026 Book Studio AI
