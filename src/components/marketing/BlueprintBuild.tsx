@@ -134,7 +134,7 @@ export function BlueprintBuild() {
                       className={
                         "flex h-12 w-12 items-center justify-center rounded-full ring-4 ring-canvas sm:h-14 sm:w-14 " +
                         (isLast
-                          ? "bg-brand text-white shadow-glow"
+                          ? "bg-brand-gradient text-white shadow-glow"
                           : "bg-indigo-soft text-indigo shadow-soft")
                       }
                     >

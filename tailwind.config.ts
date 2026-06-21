@@ -51,8 +51,13 @@ const config: Config = {
         display: ["var(--font-playfair)", "Georgia", "serif"],
       },
       backgroundImage: {
-        brand: "linear-gradient(135deg, #4F46E5 0%, #6366F1 40%, #818CF8 100%)",
-        "brand-dark":
+        // Explicit gradient utilities (bg-brand-gradient / -dark). Named so they
+        // never collide with the `brand` / `brand-dark` *color* tokens above —
+        // otherwise `bg-brand` would emit both a background-color and a
+        // background-image, and the gradient would paint over the slate color.
+        "brand-gradient":
+          "linear-gradient(135deg, #4F46E5 0%, #6366F1 40%, #818CF8 100%)",
+        "brand-gradient-dark":
           "linear-gradient(135deg, #312E81 0%, #4338CA 45%, #4F46E5 100%)",
         "midnight-glow":
           "radial-gradient(60% 50% at 50% 0%, rgba(99,102,241,0.22) 0%, rgba(15,23,42,0) 70%)",

@@ -152,8 +152,8 @@ export function NarrativeConverge() {
               className="pointer-events-none absolute inset-0 flex items-center justify-center"
             >
               {/* Luminous convergence engine */}
-              <div className="nc-orb absolute flex h-28 w-28 items-center justify-center rounded-full bg-brand shadow-glow animate-pulse-glow">
-                <span className="absolute inset-0 rounded-full bg-brand blur-2xl opacity-60" />
+              <div className="nc-orb absolute flex h-28 w-28 items-center justify-center rounded-full bg-brand-gradient shadow-glow animate-pulse-glow">
+                <span className="absolute inset-0 rounded-full bg-brand-gradient blur-2xl opacity-60" />
                 <Sparkles className="relative h-9 w-9 text-white" />
               </div>
 
@@ -237,7 +237,7 @@ export function NarrativeConverge() {
 
           <Reveal direction="up" delay={0.05}>
             <div className="rounded-3xl bg-midnight px-6 py-12 text-center shadow-book">
-              <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-brand shadow-glow animate-pulse-glow">
+              <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-brand-gradient shadow-glow animate-pulse-glow">
                 <Sparkles className="h-7 w-7 text-white" />
               </div>
               <h2 className="font-display text-4xl font-bold tracking-tight text-balance text-white">
