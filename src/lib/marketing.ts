@@ -21,6 +21,8 @@ import {
   Heart,
   Dumbbell,
   BookOpen,
+  Image,
+  Video,
 } from "lucide-react";
 
 /** Raw inputs that "flow into" the book — used in the hero + narrative scenes. */
@@ -38,6 +40,14 @@ export const CONTENT_ITEMS: ContentItem[] = [
   { label: "Recipes", icon: Utensils },
   { label: "Interviews", icon: Quote },
   { label: "Courses", icon: GraduationCap },
+];
+
+/** The eight stickers that float around the hero book (the six core sources
+ *  plus Images and Videos). Kept separate so the narrative orbit is unaffected. */
+export const HERO_ITEMS: ContentItem[] = [
+  ...CONTENT_ITEMS.slice(0, 6),
+  { label: "Images", icon: Image },
+  { label: "Videos", icon: Video },
 ];
 
 /** Book categories shown in the premium 3D showcase. */

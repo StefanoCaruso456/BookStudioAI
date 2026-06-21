@@ -5,16 +5,18 @@ import { CTAButton } from "./primitives/CTAButton";
 import { GradientText } from "./primitives/GradientText";
 import { ContentChip } from "./primitives/ContentChip";
 import { Book3D } from "./primitives/Book3D";
-import { CONTENT_ITEMS } from "@/lib/marketing";
+import { HERO_ITEMS } from "@/lib/marketing";
 
-// Chips positioned around the floating book (desktop).
+// Chips positioned around the floating book (desktop). Order matches HERO_ITEMS.
 const CHIP_POS = [
-  "left-[-6%] top-[12%]",
-  "right-[-8%] top-[6%]",
-  "left-[-10%] top-[54%]",
-  "right-[-6%] top-[48%]",
-  "left-[8%] top-[88%]",
-  "right-[12%] top-[90%]",
+  "left-[-6%] top-[12%]", // Notes
+  "right-[-8%] top-[6%]", // Documents
+  "left-[-10%] top-[54%]", // Instagram
+  "right-[-6%] top-[48%]", // Podcasts
+  "left-[8%] top-[88%]", // Newsletters
+  "right-[12%] top-[90%]", // Recipes
+  "left-[-2%] top-[33%]", // Images
+  "right-[2%] top-[72%]", // Videos
 ];
 
 export function Hero() {
@@ -101,7 +103,7 @@ export function Hero() {
           </motion.div>
 
           {/* drifting content chips */}
-          {CONTENT_ITEMS.slice(0, 6).map((item, i) => (
+          {HERO_ITEMS.map((item, i) => (
             <motion.div
               key={item.label}
               className={`absolute hidden lg:block ${CHIP_POS[i]}`}
