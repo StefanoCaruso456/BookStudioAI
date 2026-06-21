@@ -33,31 +33,34 @@ export function NarrativeConverge() {
         const beat3 = r.querySelector(".nc-beat-3");
         const orb = r.querySelector(".nc-orb");
         const glow = r.querySelector(".nc-glow");
+        const darken = r.querySelector(".nc-darken");
         if (!stage || !chips.length) return;
 
-        // Each chip sits on an ellipse around the centered headline. Radii are
-        // measured from the stage so the ring scales with the viewport, and a
-        // half-step (22.5°) angular offset keeps every chip off the exact
-        // horizontal axis — so none of them land on top of the headline.
-        const orbit = () => {
+        // Geometry derived from the stage so it scales with the viewport.
+        // - chips sit on an ellipse around the headline (22.5° offset keeps
+        //   them off the horizontal axis, so none land on the text)
+        // - the core crowns ABOVE the headline; chips converge up into it
+        const geom = () => {
           const w = stage.clientWidth;
           const h = stage.clientHeight;
           const rx = gsap.utils.clamp(300, 560, w * 0.48);
           const ry = gsap.utils.clamp(190, 300, h * 0.44);
+          const orbY = -h * 0.3;
           const n = chips.length;
-          return chips.map((_, i) => {
+          const ring = chips.map((_, i) => {
             const angle = ((-90 + 22.5 + (360 / n) * i) * Math.PI) / 180;
             return { x: Math.cos(angle) * rx, y: Math.sin(angle) * ry };
           });
+          return { ring, orbY };
         };
-        let ring = orbit();
+        let { ring, orbY } = geom();
 
-        // Readable default (also the no-JS state): beat 1 visible, chips spread
-        // on the orbit, the core hidden.
+        // Readable default (also the no-JS state).
         gsap.set([beat2, beat3], { autoAlpha: 0 });
         gsap.set(beat1, { autoAlpha: 1 });
-        gsap.set(orb, { autoAlpha: 0, scale: 0.6 });
+        gsap.set(darken, { opacity: 0 });
         gsap.set(glow, { autoAlpha: 0 });
+        gsap.set(orb, { xPercent: -50, yPercent: -50, y: orbY, autoAlpha: 0, scale: 0.6 });
         gsap.set(chips, {
           xPercent: -50,
           yPercent: -50,
@@ -69,7 +72,8 @@ export function NarrativeConverge() {
         });
 
         const onResize = () => {
-          ring = orbit();
+          ({ ring, orbY } = geom());
+          gsap.set(orb, { y: orbY });
           gsap.set(chips, { x: (i) => ring[i].x, y: (i) => ring[i].y });
         };
         window.addEventListener("resize", onResize);
@@ -102,20 +106,18 @@ export function NarrativeConverge() {
             0.4
           );
 
-        // Beat 2 → 3: chips are pulled into the core, which ignites.
-        tl.to(beat2, { autoAlpha: 0, duration: 0.4 }, 2.0)
+        // Beat 2 → 3: background deepens to midnight, the core ignites above
+        // the headline, and chips are pulled up into it.
+        tl.to(darken, { opacity: 1, duration: 1.0 }, 1.8)
+          .to(beat2, { autoAlpha: 0, duration: 0.4 }, 2.0)
           .to(beat3, { autoAlpha: 1, duration: 0.4 }, 2.4)
-          .to(
-            orb,
-            { autoAlpha: 1, scale: 1, duration: 0.8, ease: "back.out(1.6)" },
-            2.2
-          )
+          .to(orb, { autoAlpha: 1, scale: 1, duration: 0.8, ease: "back.out(1.6)" }, 2.2)
           .to(glow, { autoAlpha: 1, duration: 1.0, ease: "power1.inOut" }, 1.8)
           .to(
             chips,
             {
               x: 0,
-              y: 0,
+              y: orbY,
               rotate: 0,
               opacity: 0,
               scale: 0.5,
@@ -141,28 +143,31 @@ export function NarrativeConverge() {
   return (
     <section
       ref={root}
-      className="relative isolate overflow-hidden bg-canvas py-24 text-ink transition-colors sm:py-32"
+      className="relative isolate overflow-hidden bg-canvas py-24 text-ink sm:py-32"
     >
-      {/* Background wash that deepens toward midnight as the story converges */}
+      {/* Soft radial glow that blooms as the story converges */}
       <div
         aria-hidden
         className="nc-glow pointer-events-none absolute inset-0 -z-10 bg-midnight-glow opacity-0"
       />
+      {/* Midnight backdrop that fades in for the convergence so the white
+          beat-3 text reads on a dark surface (animated by GSAP; on small
+          screens / no-JS the dark card below carries the same role). */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-b from-canvas via-canvas to-midnight/95"
+        className="nc-darken pointer-events-none absolute inset-0 bg-midnight opacity-0"
       />
 
-      <div className="mx-auto max-w-content px-5 sm:px-8">
+      <div className="relative mx-auto max-w-content px-5 sm:px-8">
         {/* ───────────────────────── DESKTOP STAGE (lg+) ───────────────────── */}
         <div className="hidden lg:block">
           <div className="nc-stage relative mx-auto flex min-h-[72vh] max-w-5xl items-center justify-center">
             {/* Orbit field — sits behind the headline */}
             <div aria-hidden className="pointer-events-none absolute inset-0">
-              {/* Luminous convergence core */}
-              <div className="nc-orb absolute left-1/2 top-1/2 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand-gradient shadow-glow animate-pulse-glow">
+              {/* Luminous convergence core — crowns above the headline */}
+              <div className="nc-orb absolute left-1/2 top-1/2 flex h-20 w-20 items-center justify-center rounded-full bg-brand-gradient shadow-glow animate-pulse-glow">
                 <span className="absolute inset-0 rounded-full bg-brand-gradient opacity-60 blur-2xl" />
-                <Sparkles className="relative h-9 w-9 text-white" />
+                <Sparkles className="relative h-8 w-8 text-white" />
               </div>
 
               {CONTENT_ITEMS.map((item) => (
@@ -201,7 +206,7 @@ export function NarrativeConverge() {
                   Book Studio AI turns knowledge into{" "}
                   <GradientText animate>structure</GradientText>.
                 </h2>
-                <p className="mx-auto mt-5 max-w-md text-pretty text-lg text-white/70">
+                <p className="mx-auto mt-5 max-w-md text-pretty text-lg text-white/75">
                   Every fragment is pulled into one luminous, ordered narrative.
                 </p>
               </div>
@@ -248,7 +253,7 @@ export function NarrativeConverge() {
                 Book Studio AI turns knowledge into{" "}
                 <GradientText animate>structure</GradientText>.
               </h2>
-              <p className="mx-auto mt-4 max-w-md text-pretty text-base text-white/70">
+              <p className="mx-auto mt-4 max-w-md text-pretty text-base text-white/75">
                 Every fragment is pulled into one luminous, ordered narrative.
               </p>
             </div>
