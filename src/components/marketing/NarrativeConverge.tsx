@@ -40,12 +40,22 @@ export function NarrativeConverge() {
         // - chips sit on an ellipse around the headline (22.5° offset keeps
         //   them off the horizontal axis, so none land on the text)
         // - the core crowns ABOVE the headline; chips converge up into it
+        const heads = stage.querySelector<HTMLElement>(".nc-heads");
         const geom = () => {
-          const w = stage.clientWidth;
-          const h = stage.clientHeight;
+          const sRect = stage.getBoundingClientRect();
+          const w = sRect.width;
+          const h = sRect.height;
           const rx = gsap.utils.clamp(300, 560, w * 0.48);
           const ry = gsap.utils.clamp(190, 300, h * 0.44);
-          const orbY = -h * 0.3;
+          // Crown the core a fixed gap ABOVE the headline block (measured) so it
+          // can never overlap the text, however the headline wraps.
+          const ORB_RADIUS = 40;
+          const GAP = 28;
+          let orbY = -h * 0.34;
+          if (heads) {
+            const hRect = heads.getBoundingClientRect();
+            orbY = hRect.top - sRect.top - h / 2 - GAP - ORB_RADIUS;
+          }
           const n = chips.length;
           const ring = chips.map((_, i) => {
             const angle = ((-90 + 22.5 + (360 / n) * i) * Math.PI) / 180;
@@ -165,8 +175,11 @@ export function NarrativeConverge() {
             {/* Orbit field — sits behind the headline */}
             <div aria-hidden className="pointer-events-none absolute inset-0">
               {/* Luminous convergence core — crowns above the headline */}
-              <div className="nc-orb absolute left-1/2 top-1/2 flex h-20 w-20 items-center justify-center rounded-full bg-brand-gradient shadow-glow animate-pulse-glow">
-                <span className="absolute inset-0 rounded-full bg-brand-gradient opacity-60 blur-2xl" />
+              {/* Core transform is owned entirely by GSAP (positioning); the
+                  pulse animation lives on the inner glow so its CSS transform
+                  doesn't clobber the GSAP placement. */}
+              <div className="nc-orb absolute left-1/2 top-1/2 flex h-20 w-20 items-center justify-center rounded-full bg-brand-gradient shadow-glow">
+                <span className="absolute inset-0 rounded-full bg-brand-gradient opacity-60 blur-2xl animate-pulse-glow" />
                 <Sparkles className="relative h-8 w-8 text-white" />
               </div>
 
@@ -181,7 +194,7 @@ export function NarrativeConverge() {
             </div>
 
             {/* Crossfading headline blocks, stacked on the same center */}
-            <div className="relative z-10 grid max-w-xl place-items-center text-center">
+            <div className="nc-heads relative z-10 grid max-w-xl place-items-center text-center">
               <div className="nc-beat-1 col-start-1 row-start-1">
                 <h2 className="font-display text-4xl font-bold tracking-tight text-balance sm:text-5xl">
                   Your book already exists.
