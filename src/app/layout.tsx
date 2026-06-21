@@ -19,9 +19,31 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Book Studio AI — Turn Years of Knowledge Into a Published Book",
+  title: "Book Studio AI — Turn Your Knowledge Into a Published Book",
   description:
-    "Transform your notes, documents, recipes, podcasts, newsletters, and expertise into a professionally written, publish-ready book.",
+    "Turn notes, recipes, transcripts, and expertise into a publish-ready book — AI outlining, writing, editing, and publishing for creators, coaches, and experts.",
+  keywords: [
+    "AI book writing",
+    "write a book with AI",
+    "self-publishing",
+    "AI book generator",
+    "book outline generator",
+    "cookbook maker",
+    "publish a book",
+  ],
+  openGraph: {
+    title: "Book Studio AI — Turn Your Knowledge Into a Published Book",
+    description:
+      "Turn notes, recipes, transcripts, and expertise into a publish-ready book — AI outlining, writing, editing, and publishing for creators, coaches, and experts.",
+    siteName: "Book Studio AI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Book Studio AI — Turn Your Knowledge Into a Published Book",
+    description:
+      "Turn notes, recipes, transcripts, and expertise into a publish-ready book with AI outlining, writing, editing, and publishing.",
+  },
 };
 
 export default function RootLayout({
