@@ -102,7 +102,7 @@ export function BookBuilderWizard() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-5 py-10 sm:px-8">
+    <div className="mx-auto max-w-3xl px-5 pb-10 pt-24 sm:px-8">
       <div className="mb-8">
         <StepProgress steps={STEPS} current={step} onJump={(i) => i <= step && setStep(i)} />
       </div>
