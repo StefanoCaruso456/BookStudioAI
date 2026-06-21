@@ -24,7 +24,7 @@ export function MobileCTABar() {
     >
       <Link
         href="/builder"
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3.5 text-sm font-semibold text-white shadow-glow"
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-gradient px-6 py-3.5 text-sm font-semibold text-white shadow-glow"
       >
         Start Your Book
         <ArrowRight className="h-4 w-4" />

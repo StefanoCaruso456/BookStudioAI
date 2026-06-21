@@ -259,7 +259,7 @@ export function BookComesAlive() {
                 className="absolute -right-2 -top-5 sm:-right-5 sm:-top-7"
                 style={{ transform: "rotate(-8deg)" }}
               >
-                <div className="flex items-center gap-2 rounded-full bg-brand px-4 py-2 shadow-glow ring-1 ring-white/20">
+                <div className="flex items-center gap-2 rounded-full bg-brand-gradient px-4 py-2 shadow-glow ring-1 ring-white/20">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
                     <Check className="h-3.5 w-3.5 text-white" aria-hidden />
                   </span>

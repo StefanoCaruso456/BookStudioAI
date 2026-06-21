@@ -26,7 +26,7 @@ export function CTAButton({
   };
   const variants = {
     primary:
-      "bg-brand text-white shadow-glow hover:-translate-y-0.5 hover:shadow-[0_16px_50px_-8px_rgba(79,70,229,0.6)]",
+      "bg-brand-gradient text-white shadow-glow hover:-translate-y-0.5 hover:shadow-[0_16px_50px_-8px_rgba(79,70,229,0.6)]",
     secondary: onDark
       ? "border border-white/25 bg-white/5 text-white hover:bg-white/10"
       : "border border-line bg-white/70 text-ink hover:border-indigo/40 hover:text-indigo",

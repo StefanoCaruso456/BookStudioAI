@@ -1,102 +1,97 @@
 # Deploy & CI/CD — Book Studio AI
 
-The goal: **open a PR → automatic preview deploy → merge to `main` → automatic
-production deploy.** This is Vercel's native Git integration plus a GitHub
-Actions quality gate. Set it up once; after that every PR ships itself.
+Production deploys run through **GitHub Actions → Vercel**, gated on tests.
+Pull requests get a quality check plus a Vercel preview; merging to `main`
+triggers a test-gated production deploy whose pass/fail (and full build logs)
+are visible in the **Actions** tab.
 
 ---
 
-## The pipeline at a glance
+## Pipeline at a glance
 
 ```
-feature branch ──PR──▶  GitHub Actions CI (typecheck + build)
-                         + Vercel Preview Deploy  (unique URL on the PR)
+feature branch ──PR──▶  CI (.github/workflows/ci.yml): typecheck → test → build
+                         + Vercel preview deployment (URL commented on the PR)
                               │
-                            merge
+                            merge to main
                               ▼
-                          main  ──▶  Vercel Production Deploy
+        Deploy (.github/workflows/deploy.yml):
+        typecheck → test → vercel build → vercel deploy --prod
 ```
 
-- **App** runs on **Vercel** (the only place that builds/serves Next.js).
-- **Postgres** lives on **Railway** (always-on database; not a per-PR deploy).
+- **App** is built and served on **Vercel**.
+- **`vercel.json`** disables Vercel's *native* auto-deploy for `main`, so it
+  doesn't race the Actions deploy. PR preview deploys are unaffected.
+- A failing test **blocks** the production deploy.
 
 ---
 
-## One-time setup
+## Workflows
 
-### 1. Vercel — import the repo (the deploy engine)
+| File | Trigger | Does |
+| --- | --- | --- |
+| `.github/workflows/ci.yml` | PR to `main` | `npm ci` → `typecheck` → `test` → `build` |
+| `.github/workflows/deploy.yml` | push to `main` | `typecheck` → `test` → `vercel build --prod` → `vercel deploy --prebuilt --prod` |
 
-1. Go to **vercel.com/new** → **Import** `StefanoCaruso456/BookStudioAI`.
-2. **Framework Preset → `Next.js`** ⚠️ (do NOT leave it on "Other" — the build
-   will be wrong otherwise).
-3. **Root Directory → `./`** (the app is the repo root; `package.json` is at top
-   level).
-4. **Environment Variables →** leave empty for now. The MVP runs with zero
-   secrets. Add these later as you wire services in:
-   - `DATABASE_URL` (from Railway)
-   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`
-   - `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`
-   - `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-5. Click **Deploy**.
+---
 
-**That's the automation.** From now on, Vercel's GitHub app does this with no
-extra config:
+## Required configuration
 
-| Action | Result |
+### GitHub Actions secrets (for the deploy)
+Repo → **Settings → Secrets and variables → Actions**:
+
+| Secret | Purpose |
 | --- | --- |
-| Open a PR to `main` | **Preview deployment** — Vercel bot comments the URL on the PR |
-| New commit on the PR | Preview redeploys |
-| Merge / push to `main` | **Production deployment** |
+| `VERCEL_TOKEN` | Vercel access token the deploy authenticates with (scoped to the project's team) |
+| `VERCEL_ORG_ID` | Vercel team/org ID (`team_…`) |
+| `VERCEL_PROJECT_ID` | Vercel project ID (`prj_…`) |
 
-### 2. Railway — Postgres only
+> `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` come from `.vercel/project.json` after
+> running `vercel link`, or from the Vercel project settings. Never commit these
+> or paste secret values anywhere public.
 
-1. In your Railway project: if a `book-studio-ai` **app** service exists, delete
-   it (the app belongs on Vercel, not here — running it both places = double
-   cost).
-2. **+ New → Database → Add PostgreSQL.**
-3. Copy the connection string from the DB's **Variables → `DATABASE_URL`**.
-4. Paste it into **Vercel → Project → Settings → Environment Variables** as
-   `DATABASE_URL`, then redeploy.
+### Vercel project environment variables (for the running app)
+Vercel → Project → **Settings → Environment Variables** (mark secrets as
+*Sensitive*; the Actions deploy pulls them via `vercel pull`):
 
-> Railway's Postgres is always-on. (Optional, later: Project → Settings →
-> Environments → enable **PR environments** if you ever want throwaway DBs per
-> PR for a worker service.)
-
-### 3. GitHub — make the checks required (recommended)
-
-So nothing merges to `main` unless CI is green:
-
-1. Repo → **Settings → Branches → Add branch ruleset** (or "Add rule") for
-   `main`.
-2. Enable **Require a pull request before merging**.
-3. Enable **Require status checks to pass** → select **`Typecheck & build`**
-   (the job from `.github/workflows/ci.yml`) — it appears after the first PR
-   runs once.
+| Variable | Purpose |
+| --- | --- |
+| `OPENAI_API_KEY` | Enables real **gpt-4o** generation. Server-side only — never `NEXT_PUBLIC_`. |
+| `DATABASE_URL` | (Later) Railway Postgres, once persistence is wired. |
 
 ---
 
-## The everyday workflow
+## Runs without any secrets
+
+The app is designed to run with **zero secrets**:
+
+- **No `OPENAI_API_KEY`** → the AI layer falls back to deterministic,
+  genre-aware placeholder output (see `src/lib/ai/`).
+- **No database** → state persists to the browser (`localStorage`) via the
+  Zustand store.
+
+So previews and local dev work out of the box; add `OPENAI_API_KEY` when you
+want live AI.
+
+---
+
+## Everyday workflow
 
 ```bash
 git checkout -b feature/my-change
 # ...edit...
+npm run typecheck && npm test && npm run build   # match CI locally
 git commit -am "Describe the change"
 git push -u origin feature/my-change
-gh pr create --fill          # opens the PR
+# open a PR → CI + Vercel preview run automatically
 ```
 
-Then on the PR you automatically get:
-- ✅ **CI** — typecheck + build (GitHub Actions)
-- 🔍 **Preview URL** — the live change to click through (Vercel)
-
-Merge when both are green → production deploys itself.
+Merge when CI is green → production deploys itself, verifiable in the Actions tab.
 
 ---
 
-## What's already in the repo
+## Recommended: protect `main`
 
-- **`.github/workflows/ci.yml`** — runs `npm ci`, `npm run typecheck`,
-  `npm run build` on every PR and push to `main`.
-- **`.env.example`** — the full list of env vars for when you wire up services.
-- **`src/lib/db/schema.ts`** — Drizzle schema, ready for `npm run db:push` once
-  `DATABASE_URL` is set.
+So nothing merges unless CI passes: Repo → **Settings → Branches** → add a rule
+for `main` → **Require a pull request** and **Require status checks to pass**,
+selecting the **`Typecheck, test & build`** check from `ci.yml`.

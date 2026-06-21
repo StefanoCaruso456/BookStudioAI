@@ -40,7 +40,7 @@ export function SiteHeader() {
     >
       <div className="mx-auto flex h-16 max-w-content items-center justify-between px-5 sm:px-8">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white shadow-glow">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-gradient text-white shadow-glow">
             <BookMarked className="h-[18px] w-[18px]" />
           </span>
           <span className="text-[15px] font-semibold tracking-tight text-ink">

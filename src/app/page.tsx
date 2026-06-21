@@ -29,7 +29,7 @@ export default function HomePage() {
       <footer className="border-t border-line bg-canvas">
         <div className="mx-auto flex max-w-content flex-col items-center justify-between gap-6 px-5 py-12 sm:flex-row sm:px-8">
           <Link href="/" className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-gradient text-white">
               <BookMarked className="h-4 w-4" />
             </span>
             <span className="text-sm font-semibold text-ink">Book Studio AI</span>

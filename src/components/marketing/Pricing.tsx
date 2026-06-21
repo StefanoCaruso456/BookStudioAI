@@ -84,7 +84,7 @@ export function Pricing() {
               <div
                 className={
                   tier.highlighted
-                    ? "relative flex h-full flex-col rounded-3xl bg-brand-dark p-8 text-white shadow-glow ring-1 ring-indigo/40 lg:-mt-4 lg:scale-[1.03]"
+                    ? "relative flex h-full flex-col rounded-3xl bg-brand-gradient-dark p-8 text-white shadow-glow ring-1 ring-indigo/40 lg:-mt-4 lg:scale-[1.03]"
                     : "relative flex h-full flex-col rounded-3xl border border-line bg-white p-8 text-ink shadow-soft"
                 }
               >
