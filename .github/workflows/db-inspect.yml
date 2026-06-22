@@ -1,0 +1,31 @@
+name: DB Inspect (read-only)
+
+# Manual, read-only database inspection. Runs from GitHub's network (which can
+# reach Railway's public proxy) and prints schema + auth-table rows + row counts
+# into the Actions log. Never writes; never prints OAuth tokens.
+# Trigger: Actions tab -> "DB Inspect (read-only)" -> Run workflow.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    name: Inspect database
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Inspect database
+        run: node scripts/db-inspect.mjs
