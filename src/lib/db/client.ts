@@ -19,9 +19,15 @@ const globalForDb = globalThis as unknown as {
   __pgClient?: ReturnType<typeof postgres>;
 };
 
+// Vercel + GitHub Actions are external to Railway, so we use the PUBLIC proxy
+// URL (DATABASE_URL_PUBLIC). Fall back to DATABASE_URL only if the public one
+// isn't set (the `.railway.internal` value won't resolve off-platform).
+const connectionString =
+  process.env.DATABASE_URL_PUBLIC ?? process.env.DATABASE_URL ?? "";
+
 const client =
   globalForDb.__pgClient ??
-  postgres(process.env.DATABASE_URL ?? "", {
+  postgres(connectionString, {
     max: 1,
     idle_timeout: 20,
     prepare: false,

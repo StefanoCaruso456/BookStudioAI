@@ -9,7 +9,7 @@ name: Deploy (Production)
 #   VERCEL_TOKEN       - a Vercel access token (Vercel -> Account Settings -> Tokens)
 #   VERCEL_ORG_ID      - from .vercel/project.json after `vercel link`, or team settings
 #   VERCEL_PROJECT_ID  - from .vercel/project.json, or Project Settings -> General
-#   DATABASE_URL       - Railway Postgres connection string (also set in Vercel env)
+#   DATABASE_URL_PUBLIC - Railway PUBLIC proxy URL (also set in Vercel env)
 #
 # Vercel's own auto-deploy for `main` is disabled in vercel.json so the two
 # don't race / double-deploy. Preview deploys for PR branches are unaffected.
@@ -17,8 +17,8 @@ name: Deploy (Production)
 # Database migrations run as a serialized CI step BEFORE deploy (best practice
 # for serverless: never migrate at app boot — instances would race). Migrations
 # are additive/expand-contract, so applying schema ahead of the new code is the
-# safe ordering. The step is skipped until DATABASE_URL is set, so it can't
-# break deploys before the DB is provisioned. Use the manual "Run workflow"
+# safe ordering. The step is skipped until DATABASE_URL_PUBLIC is set, so it
+# can't break deploys before the DB is provisioned. Use the manual "Run workflow"
 # (workflow_dispatch) to baseline the schema once before the data cutover lands.
 
 on:
@@ -34,7 +34,8 @@ concurrency:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  # Public Railway proxy URL — drizzle.config.ts reads DATABASE_URL_PUBLIC.
+  DATABASE_URL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
 
 jobs:
   deploy:
@@ -63,7 +64,7 @@ jobs:
       # DATABASE_URL is configured, so it never blocks a deploy prematurely.
       # Idempotent: drizzle tracks applied migrations in __drizzle_migrations.
       - name: Run database migrations
-        if: ${{ env.DATABASE_URL != '' }}
+        if: ${{ env.DATABASE_URL_PUBLIC != '' }}
         run: npm run db:migrate
 
       - name: Install Vercel CLI
