@@ -15,6 +15,7 @@ import { BlueprintPreview } from "./BlueprintPreview";
 import { PRIMARY_GENRES, getGenre } from "@/lib/genres";
 import { useStore, useHydrated } from "@/lib/store";
 import { generateBookBlueprint, type BlueprintDraft } from "@/lib/ai";
+import { createProjectAction } from "@/lib/data/actions";
 import type { BookType } from "@/types/book";
 
 const STEPS = ["Book Type", "Goal", "Audience", "Source", "Details", "Blueprint"];
@@ -27,8 +28,6 @@ export function BookBuilderWizard() {
 
   const draft = useStore((s) => s.draft);
   const setDraft = useStore((s) => s.setDraft);
-  const createProject = useStore((s) => s.createProject);
-  const approveBlueprint = useStore((s) => s.approveBlueprint);
   const resetDraft = useStore((s) => s.resetDraft);
 
   const [step, setStep] = useState(0);
@@ -104,12 +103,25 @@ export function BookBuilderWizard() {
       return;
     }
     setApproving(true);
-    const project = createProject(blueprint);
-    approveBlueprint(project.id);
-    const targetType = draft.bookType;
-    router.push(`/project/${project.id}`);
-    // clear the draft for the next book once we've navigated away
-    setTimeout(() => resetDraft(targetType), 400);
+    try {
+      // Persist to the database (creates project + blueprint + chapters).
+      const project = await createProjectAction({
+        bookType: draft.bookType,
+        goal: draft.goal,
+        audience: draft.audience,
+        initialPrompt: draft.initialPrompt,
+        genreData: draft.genreData,
+        sourceContent: draft.sourceContent.map(
+          ({ projectId: _p, ...rest }) => rest
+        ),
+        blueprint,
+      });
+      resetDraft(draft.bookType);
+      router.push(`/project/${project.id}`);
+    } catch (err) {
+      console.error("Failed to create project", err);
+      setApproving(false);
+    }
   }
 
   const canNext =

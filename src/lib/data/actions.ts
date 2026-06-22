@@ -79,3 +79,12 @@ export async function setPublishingKitAction(
   revalidatePath(`/project/${projectId}`);
   revalidatePath(`/project/${projectId}/publishing`);
 }
+
+export async function importProjectsAction(
+  projects: BookProject[]
+): Promise<number> {
+  const userId = await requireUserId();
+  const n = await repo.importProjects(userId, projects);
+  revalidatePath("/dashboard");
+  return n;
+}

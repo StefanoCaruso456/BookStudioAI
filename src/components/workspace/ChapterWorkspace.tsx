@@ -1,14 +1,12 @@
 "use client";
-import Link from "next/link";
 import { useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
 import { ChapterSidebar } from "./ChapterSidebar";
 import { ChapterEditor } from "./ChapterEditor";
 import { AIActionPanel } from "./AIActionPanel";
 import { EditingToolbar } from "./EditingToolbar";
 import { SubscriptionGate } from "@/components/common/SubscriptionGate";
-import { Button } from "@/components/ui/button";
-import { useStore, useHydrated } from "@/lib/store";
+import { useStore } from "@/lib/store";
+import { patchChapterAction } from "@/lib/data/actions";
 import {
   generateChapterDraft,
   rewriteChapter,
@@ -16,7 +14,7 @@ import {
   type ChapterAction,
   type EditMode,
 } from "@/lib/ai";
-import type { ChapterStatus } from "@/types/book";
+import type { BookProject, Chapter, ChapterStatus } from "@/types/book";
 
 const ACTION_LABELS: Record<ChapterAction, string> = {
   rewrite: "Rewrite",
@@ -28,11 +26,12 @@ const ACTION_LABELS: Record<ChapterAction, string> = {
   add_genre_content: "Add genre content",
 };
 
-export function ChapterWorkspace({ projectId }: { projectId: string }) {
-  const hydrated = useHydrated();
-  const project = useStore((s) => s.projects.find((p) => p.id === projectId));
+export function ChapterWorkspace({ project }: { project: BookProject }) {
+  // Chapters live in local state, seeded from the server-loaded project, so
+  // edits feel instant; each change is written through to Postgres via the
+  // patchChapter server action.
+  const [chapters, setChapters] = useState<Chapter[]>(project.chapters);
   const plan = useStore((s) => s.plan);
-  const patchChapter = useStore((s) => s.patchChapter);
 
   const [selectedId, setSelectedId] = useState("");
   const [busyLabel, setBusyLabel] = useState<string | null>(null);
@@ -44,30 +43,6 @@ export function ChapterWorkspace({ projectId }: { projectId: string }) {
   const [saved, setSaved] = useState(true);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  if (!hydrated) {
-    return (
-      <div className="flex h-screen items-center justify-center text-subtle">
-        <Loader2 className="h-5 w-5 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!project) {
-    return (
-      <div className="flex h-screen flex-col items-center justify-center gap-4 px-6 text-center">
-        <p className="text-lg font-semibold">Project not found</p>
-        <p className="max-w-sm text-sm text-subtle">
-          This book may have been created on another device. Your projects are
-          stored in this browser.
-        </p>
-        <Link href="/dashboard">
-          <Button variant="secondary">Back to dashboard</Button>
-        </Link>
-      </div>
-    );
-  }
-
-  const chapters = project.chapters;
   const selected = chapters.find((c) => c.id === selectedId) ?? chapters[0];
   const tone = project.blueprint?.tone ?? "Clear and warm";
 
@@ -75,6 +50,18 @@ export function ChapterWorkspace({ projectId }: { projectId: string }) {
     setSaved(false);
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => setSaved(true), 500);
+  }
+
+  // Optimistic local update + write-through to the DB.
+  function patchChapter(
+    chapterId: string,
+    patch: Partial<Pick<Chapter, "title" | "summary" | "content" | "status">>
+  ) {
+    setChapters((cs) =>
+      cs.map((c) => (c.id === chapterId ? { ...c, ...patch } : c))
+    );
+    void patchChapterAction(project.id, chapterId, patch);
+    markSaved();
   }
 
   function requireSub(): boolean {
@@ -91,8 +78,7 @@ export function ChapterWorkspace({ projectId }: { projectId: string }) {
       selected.status === "not_started" && content.trim()
         ? "drafting"
         : selected.status;
-    patchChapter(project!.id, selected.id, { content, status });
-    markSaved();
+    patchChapter(selected.id, { content, status });
   }
 
   async function generateDraft() {
@@ -102,14 +88,13 @@ export function ChapterWorkspace({ projectId }: { projectId: string }) {
       const text = await generateChapterDraft({
         chapterTitle: selected.title,
         chapterSummary: selected.summary,
-        bookType: project!.bookType,
+        bookType: project.bookType,
         tone,
-        audience: project!.audience ?? { description: "your readers" },
-        genreData: project!.genreData,
-        sourceContent: project!.sourceContent,
+        audience: project.audience ?? { description: "your readers" },
+        genreData: project.genreData,
+        sourceContent: project.sourceContent,
       });
-      patchChapter(project!.id, selected.id, { content: text, status: "drafting" });
-      markSaved();
+      patchChapter(selected.id, { content: text, status: "drafting" });
     } finally {
       setBusyLabel(null);
     }
@@ -123,10 +108,9 @@ export function ChapterWorkspace({ projectId }: { projectId: string }) {
         action,
         content: selected.content,
         chapterTitle: selected.title,
-        bookType: project!.bookType,
+        bookType: project.bookType,
       });
-      patchChapter(project!.id, selected.id, { content: text });
-      markSaved();
+      patchChapter(selected.id, { content: text });
     } finally {
       setBusyLabel(null);
     }
@@ -145,12 +129,11 @@ export function ChapterWorkspace({ projectId }: { projectId: string }) {
 
   function applyEdit() {
     if (!selected || !suggestion) return;
-    patchChapter(project!.id, selected.id, {
+    patchChapter(selected.id, {
       content: suggestion.content,
       status: "needs_review",
     });
     setSuggestion(null);
-    markSaved();
   }
 
   const index = chapters.findIndex((c) => c.id === selected?.id);
@@ -176,13 +159,9 @@ export function ChapterWorkspace({ projectId }: { projectId: string }) {
               index={index}
               total={chapters.length}
               saved={saved}
-              onChangeTitle={(v) =>
-                (patchChapter(project.id, selected.id, { title: v }), markSaved())
-              }
+              onChangeTitle={(v) => patchChapter(selected.id, { title: v })}
               onChangeContent={updateContent}
-              onChangeStatus={(s) =>
-                (patchChapter(project.id, selected.id, { status: s }), markSaved())
-              }
+              onChangeStatus={(s) => patchChapter(selected.id, { status: s })}
             />
           ) : (
             <p className="text-subtle">This book has no chapters yet.</p>
@@ -201,7 +180,11 @@ export function ChapterWorkspace({ projectId }: { projectId: string }) {
           />
           <EditingToolbar
             busyMode={busyMode}
-            suggestion={suggestion ? { mode: suggestion.mode, summary: suggestion.summary } : null}
+            suggestion={
+              suggestion
+                ? { mode: suggestion.mode, summary: suggestion.summary }
+                : null
+            }
             onEdit={runEdit}
             onApply={applyEdit}
             onDismiss={() => setSuggestion(null)}

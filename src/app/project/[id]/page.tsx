@@ -1,5 +1,13 @@
+import { notFound } from "next/navigation";
 import { ChapterWorkspace } from "@/components/workspace/ChapterWorkspace";
+import { loadProject } from "@/lib/data/loaders";
 
-export default function ProjectPage({ params }: { params: { id: string } }) {
-  return <ChapterWorkspace projectId={params.id} />;
+export default async function ProjectPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const project = await loadProject(params.id);
+  if (!project) notFound();
+  return <ChapterWorkspace project={project} />;
 }

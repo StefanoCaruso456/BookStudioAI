@@ -68,6 +68,8 @@ interface StoreState {
   getProject: (id: string) => BookProject | undefined;
   patchProject: (id: string, patch: Partial<BookProject>) => void;
   removeProject: (id: string) => void;
+  /** Clears local projects after they've been imported to the account (T10). */
+  clearProjects: () => void;
   updateBlueprint: (projectId: string, patch: Partial<BookBlueprint>) => void;
   approveBlueprint: (projectId: string) => void;
   patchChapter: (projectId: string, chapterId: string, patch: Partial<Chapter>) => void;
@@ -147,6 +149,8 @@ export const useStore = create<StoreState>()(
 
       removeProject: (id) =>
         set((s) => ({ projects: s.projects.filter((p) => p.id !== id) })),
+
+      clearProjects: () => set({ projects: [] }),
 
       updateBlueprint: (projectId, patch) =>
         set((s) => ({
