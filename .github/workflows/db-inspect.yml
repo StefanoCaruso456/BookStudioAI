@@ -3,10 +3,17 @@ name: DB Inspect (read-only)
 # Manual, read-only database inspection. Runs from GitHub's network (which can
 # reach Railway's public proxy) and prints schema + auth-table rows + row counts
 # into the Actions log. Never writes; never prints OAuth tokens.
-# Trigger: Actions tab -> "DB Inspect (read-only)" -> Run workflow.
+# Trigger: Actions tab -> "DB Inspect (read-only)" -> Run workflow, OR push a
+# change to this workflow / the inspect script on the working branch (does not
+# touch production — deploys are main-only).
 
 on:
   workflow_dispatch:
+  push:
+    branches: [claude/test-coverage-analysis-52xihn]
+    paths:
+      - ".github/workflows/db-inspect.yml"
+      - "scripts/db-inspect.mjs"
 
 jobs:
   inspect:
