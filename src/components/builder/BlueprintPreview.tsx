@@ -24,6 +24,7 @@ export function BlueprintPreview({
   onRegenerate,
   regenerating,
   approving,
+  authed = true,
 }: {
   blueprint: BlueprintDraft;
   onChange: (patch: Partial<BlueprintDraft>) => void;
@@ -31,6 +32,9 @@ export function BlueprintPreview({
   onRegenerate: () => void;
   regenerating?: boolean;
   approving?: boolean;
+  /** When false, the CTA prompts sign-in (the project is saved to the
+   *  visitor's account on approve). */
+  authed?: boolean;
 }) {
   function selectTitle(i: number) {
     const arr = [...blueprint.titleOptions];
@@ -171,8 +175,9 @@ export function BlueprintPreview({
         <div>
           <h3 className="font-semibold tracking-tight">Ready to start writing?</h3>
           <p className="text-sm text-subtle">
-            Approving creates {blueprint.chapterSummaries.length} chapters and opens
-            your workspace.
+            {authed
+              ? `Approving creates ${blueprint.chapterSummaries.length} chapters and opens your workspace.`
+              : `Sign in to save this blueprint — we'll create your ${blueprint.chapterSummaries.length} chapters and open your workspace.`}
           </p>
         </div>
         <div className="flex shrink-0 gap-2">
@@ -182,7 +187,7 @@ export function BlueprintPreview({
           </Button>
           <Button onClick={onApprove} loading={approving}>
             {!approving && <Check className="h-4 w-4" />}
-            Approve &amp; Start Writing
+            {authed ? "Approve & Start Writing" : "Sign in to Start Writing"}
             {!approving && <ArrowRight className="h-4 w-4" />}
           </Button>
         </div>

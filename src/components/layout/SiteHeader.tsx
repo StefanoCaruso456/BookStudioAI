@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { BookMarked, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CTAButton } from "@/components/marketing/primitives/CTAButton";
+import { UserMenu } from "@/components/auth/UserMenu";
 
 const NAV = [
   { href: "/pricing", label: "Pricing" },
@@ -65,6 +66,7 @@ export function SiteHeader() {
           <CTAButton href="/builder" size="md" className="ml-2">
             Start Your Book
           </CTAButton>
+          <UserMenu className="ml-1" />
         </nav>
 
         {/* mobile trigger */}
@@ -99,6 +101,9 @@ export function SiteHeader() {
           <CTAButton href="/builder" size="lg" className="mt-2 w-full">
             Start Your Book
           </CTAButton>
+          <div className="mt-2 border-t border-line pt-3">
+            <UserMenu />
+          </div>
         </nav>
       </div>
     </header>
