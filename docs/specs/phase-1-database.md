@@ -62,8 +62,12 @@ in Risks.
 
 **ADR-3 · Migrations: `drizzle-kit generate` → commit SQL → `drizzle-kit migrate`.**
 Migration files are reviewed artifacts in `/drizzle`. `db:push` allowed only for
-local throwaway iteration. Production applies via `migrate` (manual this phase;
-automated in CI later).
+local throwaway iteration. **Production applies via a serialized CI step**
+(`drizzle-kit migrate` in the deploy workflow) that runs BEFORE deploy — never
+at app boot (serverless instances would race). Additive/expand-contract
+migrations make "schema ahead of code" the safe ordering. The step is guarded
+on `DATABASE_URL` so it can't block deploys before the DB exists; a manual
+`workflow_dispatch` baselines the schema once before the data cutover lands.
 
 **ADR-4 · Data access: server-only repository + server actions; RSC for reads.**
 A `src/lib/data/*` layer (server-only, pure functions over Drizzle) is the single
