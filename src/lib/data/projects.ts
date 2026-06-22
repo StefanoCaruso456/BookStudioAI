@@ -154,6 +154,7 @@ function mapProject(
     initialPrompt: p.initialPrompt ?? undefined,
     status: p.status as ProjectStatus,
     genreData: p.genreData ?? {},
+    lastEditedChapterId: p.lastEditedChapterId ?? undefined,
     sourceContent: (rel.sourceContent ?? []).map(mapSource),
     blueprint: rel.blueprint ? mapBlueprint(rel.blueprint) : undefined,
     chapters: (rel.chapters ?? [])
@@ -349,9 +350,11 @@ export async function patchChapter(
         eq(chaptersTable.projectId, projectId)
       )
     );
+  // Bump the project timestamp and record the resume deep-link target (ADR-4):
+  // the chapter just edited is where "Continue where you left off" lands.
   await db
     .update(bookProjects)
-    .set({ updatedAt: new Date() })
+    .set({ updatedAt: new Date(), lastEditedChapterId: chapterId })
     .where(eq(bookProjects.id, projectId));
 }
 

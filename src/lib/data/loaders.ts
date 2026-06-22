@@ -8,7 +8,9 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import * as repo from "./projects";
 import * as profileRepo from "./profiles";
+import * as builderDraftRepo from "./builderDraft";
 import type { ProfileRow } from "./profiles";
+import type { BuilderDraftRow } from "./builderDraft";
 import { shouldGateToOnboarding } from "@/lib/onboarding";
 import type { BookProject } from "@/types/book";
 
@@ -29,6 +31,16 @@ export async function loadProject(
   const userId = await currentUserId();
   if (!userId) return null;
   return repo.getProject(userId, projectId);
+}
+
+/**
+ * The current user's server-persisted builder draft (ADR-3), or null if none
+ * (or unauthenticated). Used by /builder to rehydrate the wizard cross-device.
+ */
+export async function loadBuilderDraft(): Promise<BuilderDraftRow | null> {
+  const userId = await currentUserId();
+  if (!userId) return null;
+  return builderDraftRepo.getBuilderDraft(userId);
 }
 
 /**

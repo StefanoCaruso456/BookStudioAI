@@ -1,16 +1,77 @@
 "use client";
-import { Check, Cloud } from "lucide-react";
+import { Check, Cloud, AlertTriangle, Loader2 } from "lucide-react";
 import { STATUS_LABELS } from "@/components/ui/badge";
 import type { Chapter, ChapterStatus } from "@/types/book";
+import type { SaveStatus } from "@/lib/autosave";
 import { cn } from "@/lib/utils";
 
 const STATUSES: ChapterStatus[] = ["not_started", "drafting", "needs_review", "complete"];
+
+function formatTime(at: Date | null): string {
+  if (!at) return "";
+  return at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+/** The truthful save indicator — driven by the real request, not a timer. */
+function SaveIndicator({
+  status,
+  lastSavedAt,
+  onRetry,
+}: {
+  status: SaveStatus;
+  lastSavedAt: Date | null;
+  onRetry: () => void;
+}) {
+  if (status === "error") {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-red-600">
+        <AlertTriangle className="h-3.5 w-3.5" />
+        Save failed
+        <span className="text-subtle/60">·</span>
+        <button
+          onClick={onRetry}
+          className="font-medium underline-offset-2 hover:underline"
+        >
+          Retry
+        </button>
+      </span>
+    );
+  }
+
+  if (status === "saving") {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-subtle">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        Saving…
+      </span>
+    );
+  }
+
+  if (status === "saved") {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-subtle">
+        <Check className="h-3.5 w-3.5 text-emerald-500" />
+        Saved{lastSavedAt ? ` ${formatTime(lastSavedAt)}` : ""}
+      </span>
+    );
+  }
+
+  // idle — nothing written yet this session.
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs text-subtle">
+      <Cloud className="h-3.5 w-3.5" />
+      All changes saved
+    </span>
+  );
+}
 
 export function ChapterEditor({
   chapter,
   index,
   total,
-  saved,
+  saveStatus,
+  lastSavedAt,
+  onRetry,
   onChangeTitle,
   onChangeContent,
   onChangeStatus,
@@ -18,7 +79,9 @@ export function ChapterEditor({
   chapter: Chapter;
   index: number;
   total: number;
-  saved: boolean;
+  saveStatus: SaveStatus;
+  lastSavedAt: Date | null;
+  onRetry: () => void;
   onChangeTitle: (v: string) => void;
   onChangeContent: (v: string) => void;
   onChangeStatus: (s: ChapterStatus) => void;
@@ -29,19 +92,11 @@ export function ChapterEditor({
         <span className="text-xs font-medium uppercase tracking-wide text-subtle">
           Chapter {index + 1} of {total}
         </span>
-        <span className="inline-flex items-center gap-1.5 text-xs text-subtle">
-          {saved ? (
-            <>
-              <Check className="h-3.5 w-3.5 text-emerald-500" />
-              Saved
-            </>
-          ) : (
-            <>
-              <Cloud className="h-3.5 w-3.5" />
-              Saving…
-            </>
-          )}
-        </span>
+        <SaveIndicator
+          status={saveStatus}
+          lastSavedAt={lastSavedAt}
+          onRetry={onRetry}
+        />
       </div>
 
       <input

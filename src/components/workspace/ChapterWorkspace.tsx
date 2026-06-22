@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChapterSidebar } from "./ChapterSidebar";
 import { ChapterEditor } from "./ChapterEditor";
 import { AIActionPanel } from "./AIActionPanel";
@@ -7,6 +7,7 @@ import { EditingToolbar } from "./EditingToolbar";
 import { SubscriptionGate } from "@/components/common/SubscriptionGate";
 import { useStore } from "@/lib/store";
 import { patchChapterAction } from "@/lib/data/actions";
+import { useAutosave } from "@/lib/useAutosave";
 import {
   generateChapterDraft,
   rewriteChapter,
@@ -26,10 +27,14 @@ const ACTION_LABELS: Record<ChapterAction, string> = {
   add_genre_content: "Add genre content",
 };
 
+type ChapterPatch = Partial<Pick<Chapter, "title" | "summary" | "content" | "status">>;
+/** The pending write payload: the newest patch per touched chapter, merged. */
+type SavePayload = Record<string, ChapterPatch>;
+
 export function ChapterWorkspace({ project }: { project: BookProject }) {
   // Chapters live in local state, seeded from the server-loaded project, so
-  // edits feel instant; each change is written through to Postgres via the
-  // patchChapter server action.
+  // edits feel instant; persistence is routed through the debounced,
+  // single-flight autosaver (ADR-1/ADR-2) — no more per-keystroke writes.
   const [chapters, setChapters] = useState<Chapter[]>(project.chapters);
   const plan = useStore((s) => s.plan);
 
@@ -40,29 +45,83 @@ export function ChapterWorkspace({ project }: { project: BookProject }) {
     { mode: EditMode; summary: string; content: string } | null
   >(null);
   const [showGate, setShowGate] = useState(false);
-  const [saved, setSaved] = useState(true);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // The autosaver persists a merged map of patches; one server action per
+  // touched chapter. Most of the time that's a single chapter being edited.
+  const persist = useCallback(
+    async (payload: SavePayload) => {
+      const entries = Object.entries(payload);
+      await Promise.all(
+        entries.map(([chapterId, patch]) =>
+          patchChapterAction(project.id, chapterId, patch)
+        )
+      );
+    },
+    [project.id]
+  );
+
+  const saver = useAutosave<SavePayload>(persist);
+  const lastSavedAt = saver.lastSavedAt;
+  // Accumulates patches between debounce windows so several quick edits to a
+  // chapter (or two chapters) coalesce into the smallest set of writes. Cleared
+  // once the server confirms a write (lastSavedAt advances) so we never re-send
+  // already-persisted fields.
+  const queued = useRef<SavePayload>({});
+
+  useEffect(() => {
+    if (lastSavedAt && !saver.dirty) queued.current = {};
+  }, [lastSavedAt, saver.dirty]);
+
+  // Optimistic local update + queue a debounced write-through.
+  const patchChapter = useCallback(
+    (chapterId: string, patch: ChapterPatch) => {
+      setChapters((cs) =>
+        cs.map((c) => (c.id === chapterId ? { ...c, ...patch } : c))
+      );
+      queued.current = {
+        ...queued.current,
+        [chapterId]: { ...queued.current[chapterId], ...patch },
+      };
+      // Hand the saver a fresh snapshot (it holds the reference until the write
+      // fires), so we can keep mutating `queued` without disturbing in-flight data.
+      saver.schedule({ ...queued.current });
+    },
+    [saver]
+  );
+
+  // Honor ?chapter=<id> (resume deep-link, ADR-4) like the builder's ?type=.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const target = new URLSearchParams(window.location.search).get("chapter");
+    if (target && project.chapters.some((c) => c.id === target)) {
+      setSelectedId(target);
+    }
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Unsaved-changes guard (T3): warn while a write is pending or in flight, and
+  // best-effort flush on tab-hide so a debounce window in progress isn't lost.
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (saver.dirty || saver.status === "saving") {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") saver.flush();
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [saver]);
 
   const selected = chapters.find((c) => c.id === selectedId) ?? chapters[0];
   const tone = project.blueprint?.tone ?? "Clear and warm";
-
-  function markSaved() {
-    setSaved(false);
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => setSaved(true), 500);
-  }
-
-  // Optimistic local update + write-through to the DB.
-  function patchChapter(
-    chapterId: string,
-    patch: Partial<Pick<Chapter, "title" | "summary" | "content" | "status">>
-  ) {
-    setChapters((cs) =>
-      cs.map((c) => (c.id === chapterId ? { ...c, ...patch } : c))
-    );
-    void patchChapterAction(project.id, chapterId, patch);
-    markSaved();
-  }
 
   function requireSub(): boolean {
     if (plan === "free") {
@@ -158,7 +217,9 @@ export function ChapterWorkspace({ project }: { project: BookProject }) {
               chapter={selected}
               index={index}
               total={chapters.length}
-              saved={saved}
+              saveStatus={saver.status}
+              lastSavedAt={saver.lastSavedAt}
+              onRetry={saver.retry}
               onChangeTitle={(v) => patchChapter(selected.id, { title: v })}
               onChangeContent={updateContent}
               onChangeStatus={(s) => patchChapter(selected.id, { status: s })}

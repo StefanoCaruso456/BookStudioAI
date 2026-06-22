@@ -98,6 +98,9 @@ export const bookProjects = pgTable(
     initialPrompt: text("initial_prompt"),
     status: text("status").notNull().default("draft"),
     genreData: jsonb("genre_data").$type<Record<string, string>>().default({}),
+    // Precise resume deep-link target (Phase 3, ADR-4): the chapter the user
+    // most recently edited. Nullable — set on the first chapter save.
+    lastEditedChapterId: text("last_edited_chapter_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -280,6 +283,25 @@ export const events = pgTable(
   })
 );
 
+// ───────────────────────────── Builder draft (Phase 3) ────────────────────
+//
+// builder_drafts is 1:1 with users (PK == FK, cascade) — the in-progress wizard
+// (answers + last generated blueprint) persisted server-side so resume works
+// cross-device (ADR-3). localStorage stays as a fast cache; this is the source
+// of truth. Last-write-wins (single-user app). See docs/specs/phase-3-resume.md.
+
+export const builderDrafts = pgTable("builder_drafts", {
+  // 1:1 with users — the user id IS the primary key (no surrogate).
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  // The wizard answers (bookType, goal, audience, genreData, sources, prompt).
+  draft: jsonb("draft").$type<Record<string, unknown>>(),
+  // The last generated blueprint (nullable — null until they reach the review step).
+  blueprint: jsonb("blueprint").$type<Record<string, unknown>>(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ───────────────────────────── Relations ──────────────────────────────────
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -289,6 +311,14 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     fields: [users.id],
     references: [profiles.userId],
   }),
+  builderDraft: one(builderDrafts, {
+    fields: [users.id],
+    references: [builderDrafts.userId],
+  }),
+}));
+
+export const builderDraftsRelations = relations(builderDrafts, ({ one }) => ({
+  user: one(users, { fields: [builderDrafts.userId], references: [users.id] }),
 }));
 
 export const profilesRelations = relations(profiles, ({ one }) => ({

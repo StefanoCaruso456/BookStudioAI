@@ -4,6 +4,7 @@ import Link from "next/link";
 import { BookPlus } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ProjectCard } from "@/components/dashboard/ProjectCard";
+import { ContinueCard } from "@/components/dashboard/ContinueCard";
 import { DashboardImportBanner } from "@/components/dashboard/DashboardImportBanner";
 import { Button } from "@/components/ui/button";
 import { deleteProjectAction } from "@/lib/data/actions";
@@ -23,11 +24,19 @@ export function DashboardView({
     router.refresh();
   }
 
+  // Resume target (ADR-4): the most-recently-updated in-progress book. Projects
+  // arrive newest-first, so the first writing/editing one is the right pick.
+  const resumeProject = projects.find(
+    (p) => p.status === "writing" || p.status === "editing"
+  );
+
   return (
     <main className="mx-auto max-w-content px-5 py-10 sm:px-8">
       <DashboardHeader count={projects.length} persona={persona} />
 
       <DashboardImportBanner />
+
+      {resumeProject && <ContinueCard project={resumeProject} />}
 
       {projects.length === 0 ? (
         <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-card/50 px-6 py-16 text-center">

@@ -124,6 +124,8 @@ export interface BookProject {
   status: ProjectStatus;
   /** structured answers from the genre-specific wizard step */
   genreData: Record<string, string>;
+  /** Resume deep-link target: the most recently edited chapter (Phase 3, ADR-4). */
+  lastEditedChapterId?: string;
   sourceContent: SourceContent[];
   blueprint?: BookBlueprint;
   chapters: Chapter[];

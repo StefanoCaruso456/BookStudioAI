@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import * as repo from "./projects";
 import * as profileRepo from "./profiles";
+import * as builderDraftRepo from "./builderDraft";
 import type { BookProject, Chapter } from "@/types/book";
 import type {
   CreateProjectInput,
@@ -93,6 +94,16 @@ export async function importProjectsAction(
   const n = await repo.importProjects(userId, projects);
   revalidatePath("/dashboard");
   return n;
+}
+
+// ───────────────────────────── Builder draft (Phase 3) ────────────────────
+
+export async function saveBuilderDraftAction(
+  draft: Record<string, unknown> | null,
+  blueprint: Record<string, unknown> | null
+): Promise<void> {
+  const userId = await requireUserId();
+  await builderDraftRepo.saveBuilderDraft(userId, draft, blueprint);
 }
 
 // ───────────────────────────── Profile / onboarding (Phase 2) ─────────────
