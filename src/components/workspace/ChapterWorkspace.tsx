@@ -5,7 +5,6 @@ import { ChapterEditor } from "./ChapterEditor";
 import { AIActionPanel } from "./AIActionPanel";
 import { EditingToolbar } from "./EditingToolbar";
 import { SubscriptionGate } from "@/components/common/SubscriptionGate";
-import { useStore } from "@/lib/store";
 import { patchChapterAction } from "@/lib/data/actions";
 import { useAutosave } from "@/lib/useAutosave";
 import {
@@ -31,12 +30,19 @@ type ChapterPatch = Partial<Pick<Chapter, "title" | "summary" | "content" | "sta
 /** The pending write payload: the newest patch per touched chapter, merged. */
 type SavePayload = Record<string, ChapterPatch>;
 
-export function ChapterWorkspace({ project }: { project: BookProject }) {
+export function ChapterWorkspace({
+  project,
+  isPro,
+}: {
+  project: BookProject;
+  /** Server-resolved Pro entitlement (Phase 5). Drives the upgrade UX; the
+   *  real gate lives in the server actions. */
+  isPro: boolean;
+}) {
   // Chapters live in local state, seeded from the server-loaded project, so
   // edits feel instant; persistence is routed through the debounced,
   // single-flight autosaver (ADR-1/ADR-2) — no more per-keystroke writes.
   const [chapters, setChapters] = useState<Chapter[]>(project.chapters);
-  const plan = useStore((s) => s.plan);
 
   const [selectedId, setSelectedId] = useState("");
   const [busyLabel, setBusyLabel] = useState<string | null>(null);
@@ -123,12 +129,22 @@ export function ChapterWorkspace({ project }: { project: BookProject }) {
   const selected = chapters.find((c) => c.id === selectedId) ?? chapters[0];
   const tone = project.blueprint?.tone ?? "Clear and warm";
 
+  // Optimistic client check: skip the round-trip when we already know the user
+  // isn't Pro. The authoritative gate is server-side (the action throws
+  // UPGRADE_REQUIRED), caught by isUpgradeRequired below.
   function requireSub(): boolean {
-    if (plan === "free") {
+    if (!isPro) {
       setShowGate(true);
       return false;
     }
     return true;
+  }
+
+  // The server actions throw Error("UPGRADE_REQUIRED") for non-Pro users; in
+  // production Server Action errors are redacted, so also match the digest-safe
+  // message. Either way, surface the gate.
+  function isUpgradeRequired(err: unknown): boolean {
+    return err instanceof Error && err.message.includes("UPGRADE_REQUIRED");
   }
 
   function updateContent(content: string) {
@@ -154,6 +170,9 @@ export function ChapterWorkspace({ project }: { project: BookProject }) {
         sourceContent: project.sourceContent,
       });
       patchChapter(selected.id, { content: text, status: "drafting" });
+    } catch (err) {
+      if (isUpgradeRequired(err)) setShowGate(true);
+      else throw err;
     } finally {
       setBusyLabel(null);
     }
@@ -170,6 +189,9 @@ export function ChapterWorkspace({ project }: { project: BookProject }) {
         bookType: project.bookType,
       });
       patchChapter(selected.id, { content: text });
+    } catch (err) {
+      if (isUpgradeRequired(err)) setShowGate(true);
+      else throw err;
     } finally {
       setBusyLabel(null);
     }
@@ -181,6 +203,9 @@ export function ChapterWorkspace({ project }: { project: BookProject }) {
     try {
       const res = await editChapter({ mode, content: selected.content, tone });
       setSuggestion({ mode, summary: res.summary, content: res.content });
+    } catch (err) {
+      if (isUpgradeRequired(err)) setShowGate(true);
+      else throw err;
     } finally {
       setBusyMode(null);
     }

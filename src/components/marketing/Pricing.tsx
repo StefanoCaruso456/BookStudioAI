@@ -10,51 +10,44 @@ interface Tier {
   description: string;
   features: string[];
   cta: string;
+  href: string;
   highlighted: boolean;
   badge?: string;
 }
 
+// Free vs Pro (Phase 5, ADR-1): free reaches the blueprint aha; Pro unlocks AI
+// chapter writing + export. The Pro CTA routes to /pricing, where the
+// interactive Stripe Checkout button lives (signs in first if needed).
 const TIERS: Tier[] = [
   {
     name: "Free",
     price: "$0",
     cadence: "forever",
-    description: "Blueprint + preview, so you can feel the magic first.",
+    description: "Blueprint + outline, so you can feel the magic first.",
     features: [
       "Full book blueprint",
       "Title & chapter outline",
-      "Preview your first chapter",
+      "Organize your source material",
     ],
     cta: "Start Free",
+    href: "/builder",
     highlighted: false,
   },
   {
-    name: "Weekly",
-    price: "$8",
-    cadence: "/ week",
-    description: "For an active writing sprint, start to finish.",
-    features: [
-      "Unlimited chapter generation",
-      "All AI edit modes",
-      "Complete publishing kit",
-    ],
-    cta: "Start Weekly",
-    highlighted: false,
-  },
-  {
-    name: "Monthly",
+    name: "Pro",
     price: "$30",
     cadence: "/ month",
-    description: "Everything in Weekly, framed as your best value.",
+    description: "Write and publish the whole book with AI.",
     features: [
-      "Unlimited chapter generation",
+      "AI chapter drafting, rewriting & editing",
       "All AI edit modes",
-      "Complete publishing kit",
-      "Cancel anytime",
+      "Export to PDF, EPUB & DOCX",
+      "Unlimited books · cancel anytime",
     ],
-    cta: "Go Monthly",
+    cta: "Upgrade to Pro",
+    href: "/pricing",
     highlighted: true,
-    badge: "Best value",
+    badge: "Most popular",
   },
 ];
 
@@ -78,7 +71,7 @@ export function Pricing() {
         </Reveal>
 
         {/* Tiers */}
-        <div className="mt-16 grid items-start gap-6 lg:grid-cols-3">
+        <div className="mx-auto mt-16 grid max-w-3xl items-start gap-6 sm:grid-cols-2">
           {TIERS.map((tier, i) => (
             <Reveal key={tier.name} delay={i * 0.1} className="h-full">
               <div
@@ -164,7 +157,7 @@ export function Pricing() {
 
                 <div className="mt-8">
                   <CTAButton
-                    href="/builder"
+                    href={tier.href}
                     variant={tier.highlighted ? "primary" : "secondary"}
                     size="lg"
                     onDark={tier.highlighted}
