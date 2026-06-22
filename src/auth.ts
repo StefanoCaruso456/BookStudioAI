@@ -35,6 +35,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   session: { strategy: "jwt" },
+  // Trust the deployment host (Vercel sets dynamic hostnames); avoids
+  // UntrustedHost errors when the request host isn't statically known.
+  trustHost: true,
   callbacks: {
     // Drives middleware redirects: returning false on a protected route sends
     // the visitor to the sign-in flow; everything else stays public.
