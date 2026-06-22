@@ -9,7 +9,13 @@ import { Button } from "@/components/ui/button";
 import { deleteProjectAction } from "@/lib/data/actions";
 import type { BookProject } from "@/types/book";
 
-export function DashboardView({ projects }: { projects: BookProject[] }) {
+export function DashboardView({
+  projects,
+  persona,
+}: {
+  projects: BookProject[];
+  persona?: string | null;
+}) {
   const router = useRouter();
 
   async function handleDelete(id: string) {
@@ -19,7 +25,7 @@ export function DashboardView({ projects }: { projects: BookProject[] }) {
 
   return (
     <main className="mx-auto max-w-content px-5 py-10 sm:px-8">
-      <DashboardHeader count={projects.length} />
+      <DashboardHeader count={projects.length} persona={persona} />
 
       <DashboardImportBanner />
 

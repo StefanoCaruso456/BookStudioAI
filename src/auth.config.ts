@@ -16,7 +16,7 @@ import Google from "next-auth/providers/google";
 
 /** Routes that require a signed-in user. Single source of truth for the
  *  middleware gate and the client-side action gate. */
-export const PROTECTED_PREFIXES = ["/dashboard", "/project"] as const;
+export const PROTECTED_PREFIXES = ["/dashboard", "/project", "/settings"] as const;
 
 export function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PREFIXES.some(

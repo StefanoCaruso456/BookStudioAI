@@ -7,12 +7,18 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import * as repo from "./projects";
+import * as profileRepo from "./profiles";
 import type { BookProject, Chapter } from "@/types/book";
 import type {
   CreateProjectInput,
   PublishingKitInput,
   BlueprintInput,
 } from "./projects";
+import type {
+  CompleteOnboardingInput,
+  ProfilePatch,
+  ProfileRow,
+} from "./profiles";
 
 async function requireUserId(): Promise<string> {
   const session = await auth();
@@ -87,4 +93,33 @@ export async function importProjectsAction(
   const n = await repo.importProjects(userId, projects);
   revalidatePath("/dashboard");
   return n;
+}
+
+// ───────────────────────────── Profile / onboarding (Phase 2) ─────────────
+
+export async function completeOnboardingAction(
+  input: CompleteOnboardingInput
+): Promise<ProfileRow> {
+  const userId = await requireUserId();
+  const profile = await profileRepo.completeOnboarding(userId, input);
+  // The gate reads the profile per request; revalidate the gated surfaces so
+  // the freshly-onboarded user isn't bounced back to /onboarding.
+  revalidatePath("/dashboard");
+  return profile;
+}
+
+export async function updateProfileAction(patch: ProfilePatch): Promise<void> {
+  const userId = await requireUserId();
+  await profileRepo.updateProfile(userId, patch);
+  revalidatePath("/settings");
+  revalidatePath("/dashboard");
+}
+
+export async function logEventAction(
+  name: string,
+  props?: Record<string, unknown>
+): Promise<void> {
+  // Not gated to a signed-in user: 'onboarding_started' may fire mid-session.
+  const session = await auth();
+  await profileRepo.logEvent(session?.user?.id ?? null, name, props);
 }

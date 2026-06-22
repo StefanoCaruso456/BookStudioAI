@@ -40,14 +40,24 @@ export function BookBuilderWizard() {
 
   // Returning from the sign-in redirect (?resume=1): restore the blueprint the
   // visitor built before signing in and drop them back on the review step.
+  // Coming from onboarding (?type=…): pre-select the persona's book type so
+  // step 1 lands already filled in (the personalization payoff, ADR-5).
   useEffect(() => {
     if (!hydrated) return;
-    const resume =
-      typeof window !== "undefined" &&
-      new URLSearchParams(window.location.search).get("resume") === "1";
-    if (resume && draft.blueprint) {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("resume") === "1" && draft.blueprint) {
       setBlueprint(draft.blueprint);
       setStep(5);
+      return;
+    }
+
+    const type = params.get("type");
+    if (type && PRIMARY_GENRES.some((g) => g.type === type)) {
+      setDraft({ bookType: type as BookType });
+    } else if (type === "other") {
+      setDraft({ bookType: "other" });
     }
     // run once after hydration
     // eslint-disable-next-line react-hooks/exhaustive-deps
