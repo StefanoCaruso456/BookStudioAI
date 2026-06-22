@@ -26,6 +26,8 @@ import type {
 } from "@/types/book";
 import { cn } from "@/lib/utils";
 
+type ExportFormat = "pdf" | "epub" | "docx";
+
 export function PublishingKit({ project }: { project: BookProject }) {
   const [kit, setKit] = useState<PublishingKitDraft | null>(
     project.publishingKit ? stripKit(project.publishingKit) : null
@@ -33,8 +35,32 @@ export function PublishingKit({ project }: { project: BookProject }) {
   const [authorName, setAuthorName] = useState("");
   const [generating, setGenerating] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [exporting, setExporting] = useState<ExportFormat | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const bp = project.blueprint;
+
+  async function exportBook(format: ExportFormat) {
+    setExporting(format);
+    setExportError(null);
+    try {
+      const res = await fetch(`/api/export/${project.id}?format=${format}`);
+      if (!res.ok) throw new Error(`Export failed (${res.status})`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project.title || "book"}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setExportError(`Couldn't generate the ${format.toUpperCase()}. Please try again.`);
+    } finally {
+      setExporting(null);
+    }
+  }
 
   async function generate() {
     setGenerating(true);
@@ -212,16 +238,42 @@ export function PublishingKit({ project }: { project: BookProject }) {
           </Section>
 
           <Section title="Export" icon={FileText}>
+            <p className="mb-3 text-sm text-subtle">
+              Download your finished book — title page, table of contents, and
+              every chapter in order.
+            </p>
             <div className="flex flex-wrap gap-2">
-              <Button variant="secondary" disabled title="Export coming soon">
-                <FileText className="h-4 w-4" />
-                Export PDF (coming soon)
+              <Button
+                variant="secondary"
+                loading={exporting === "pdf"}
+                disabled={exporting !== null}
+                onClick={() => exportBook("pdf")}
+              >
+                {exporting !== "pdf" && <FileText className="h-4 w-4" />}
+                {exporting === "pdf" ? "Generating…" : "Export PDF"}
               </Button>
-              <Button variant="secondary" disabled title="Export coming soon">
-                <BookOpen className="h-4 w-4" />
-                Export EPUB (coming soon)
+              <Button
+                variant="secondary"
+                loading={exporting === "epub"}
+                disabled={exporting !== null}
+                onClick={() => exportBook("epub")}
+              >
+                {exporting !== "epub" && <BookOpen className="h-4 w-4" />}
+                {exporting === "epub" ? "Generating…" : "Export EPUB"}
+              </Button>
+              <Button
+                variant="secondary"
+                loading={exporting === "docx"}
+                disabled={exporting !== null}
+                onClick={() => exportBook("docx")}
+              >
+                {exporting !== "docx" && <FileText className="h-4 w-4" />}
+                {exporting === "docx" ? "Generating…" : "Export DOCX"}
               </Button>
             </div>
+            {exportError && (
+              <p className="mt-2.5 text-sm text-red-600">{exportError}</p>
+            )}
           </Section>
 
           <Section title="KDP checklist" icon={ListChecks}>
