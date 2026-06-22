@@ -6,6 +6,7 @@
 // ===========================================================================
 import { auth } from "@/auth";
 import { getProject } from "@/lib/data/projects";
+import { isPro } from "@/lib/data/subscriptions";
 import { logEvent } from "@/lib/data/profiles";
 import { assembleExportBook } from "@/lib/export/assemble";
 import { renderBookPdf } from "@/lib/export/pdf";
@@ -47,6 +48,11 @@ export async function GET(
   const userId = session?.user?.id;
   if (!userId) {
     return new Response("Unauthorized", { status: 401 });
+  }
+
+  // Export is a Pro feature (Phase 5, ADR-4) — server-enforced, not just hidden.
+  if (!(await isPro(userId))) {
+    return new Response("Upgrade required", { status: 402 });
   }
 
   // getProject is userId-scoped: a non-owned (or missing) id returns null.

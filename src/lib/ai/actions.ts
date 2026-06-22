@@ -7,6 +7,8 @@
 // so local dev, CI, and key-less deploys keep working. The API key never
 // reaches the client because these run only on the server.
 // ===========================================================================
+import { auth } from "@/auth";
+import { isPro } from "@/lib/data/subscriptions";
 import { generateBookBlueprint as fallbackBlueprint } from "./generateBookBlueprint";
 import {
   generateChapterDraft as fallbackChapterDraft,
@@ -31,6 +33,19 @@ function warn(stage: string, err: unknown) {
   console.error(`[ai] ${stage} via OpenAI failed; using fallback:`, err);
 }
 
+/**
+ * Server-side Pro gate (Phase 5, ADR-4) for the expensive chapter-AI actions.
+ * The real enforcement: the SubscriptionGate modal is UX only. Throws the typed
+ * "UPGRADE_REQUIRED" error the client catches to surface the upgrade prompt.
+ * Blueprint + publishing-kit generation stay free and are NOT gated.
+ */
+async function requirePro(): Promise<void> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) throw new Error("Not authenticated");
+  if (!(await isPro(userId))) throw new Error("UPGRADE_REQUIRED");
+}
+
 export async function generateBookBlueprint(
   input: GenerateBlueprintInput
 ): Promise<BlueprintDraft> {
@@ -47,6 +62,7 @@ export async function generateBookBlueprint(
 export async function generateChapterDraft(
   input: GenerateChapterDraftInput
 ): Promise<string> {
+  await requirePro();
   if (!hasKey()) return fallbackChapterDraft(input);
   try {
     const { openaiChapterDraft } = await import("./openai");
@@ -58,6 +74,7 @@ export async function generateChapterDraft(
 }
 
 export async function rewriteChapter(input: RewriteChapterInput): Promise<string> {
+  await requirePro();
   if (!hasKey()) return fallbackRewrite(input);
   try {
     const { openaiRewrite } = await import("./openai");
@@ -71,6 +88,7 @@ export async function rewriteChapter(input: RewriteChapterInput): Promise<string
 export async function editChapter(
   input: EditChapterInput
 ): Promise<EditChapterResult> {
+  await requirePro();
   if (!hasKey()) return fallbackEdit(input);
   try {
     const { openaiEdit } = await import("./openai");
