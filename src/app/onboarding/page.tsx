@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 import { loadProfile } from "@/lib/data/loaders";
+import { shouldLeaveOnboarding } from "@/lib/onboarding";
 
 // The one surface that is NOT gated by requireOnboarded() — gating it would
 // loop. Instead we run the inverse check: if there is no signed-in user, send
@@ -9,6 +10,6 @@ import { loadProfile } from "@/lib/data/loaders";
 export default async function OnboardingPage() {
   const profile = await loadProfile();
   if (!profile) redirect("/api/auth/signin");
-  if (profile.onboardingCompletedAt !== null) redirect("/dashboard");
+  if (shouldLeaveOnboarding(profile.onboardingCompletedAt)) redirect("/dashboard");
   return <OnboardingWizard />;
 }

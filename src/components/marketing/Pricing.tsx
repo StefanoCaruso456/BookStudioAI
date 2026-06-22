@@ -72,7 +72,7 @@ export function Pricing() {
             One price away from <GradientText>becoming an author</GradientText>
           </h2>
           <p className="mt-5 text-lg leading-relaxed text-subtle text-pretty">
-            Start free with a complete blueprint. Upgrade only when you're ready
+            Start free with a complete blueprint. Upgrade only when you&apos;re ready
             to write the whole thing.
           </p>
         </Reveal>

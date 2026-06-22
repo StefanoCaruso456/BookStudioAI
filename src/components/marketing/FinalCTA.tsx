@@ -30,7 +30,7 @@ export function FinalCTA() {
 
           <Reveal delay={0.16}>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-white/70 text-pretty">
-              Bring what you already know. We'll shape it into a blueprint, draft
+              Bring what you already know. We&apos;ll shape it into a blueprint, draft
               every chapter in your voice, and ready it for the world.
             </p>
           </Reveal>

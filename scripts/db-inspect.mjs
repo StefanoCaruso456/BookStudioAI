@@ -66,6 +66,28 @@ try {
     const r = await sql.unsafe(`SELECT count(*)::int AS n FROM ${t}`);
     console.log(`${t}: ${r[0].n}`);
   }
+
+  h("profiles  (onboarding state — no secrets)");
+  const profiles = await sql`
+    SELECT user_id, persona, primary_goal, use_case, referral_source,
+           marketing_opt_in, onboarding_completed_at
+    FROM profiles ORDER BY created_at`;
+  console.log(`row count: ${profiles.length}`);
+  console.log(JSON.stringify(profiles, null, 2));
+
+  h("consent_log  (audit trail)");
+  const consents = await sql`
+    SELECT user_id, type, version, accepted_at FROM consent_log
+    ORDER BY accepted_at`;
+  console.log(`row count: ${consents.length}`);
+  console.log(JSON.stringify(consents, null, 2));
+
+  h("events  (funnel)");
+  const events = await sql`
+    SELECT user_id, name, created_at FROM events
+    ORDER BY created_at DESC LIMIT 25`;
+  console.log(`row count (latest 25 shown): ${events.length}`);
+  console.log(JSON.stringify(events, null, 2));
 } catch (e) {
   console.error("INSPECTION ERROR:", e.message);
   process.exitCode = 1;

@@ -9,6 +9,7 @@ import { auth } from "@/auth";
 import * as repo from "./projects";
 import * as profileRepo from "./profiles";
 import type { ProfileRow } from "./profiles";
+import { shouldGateToOnboarding } from "@/lib/onboarding";
 import type { BookProject } from "@/types/book";
 
 export async function currentUserId(): Promise<string | null> {
@@ -51,7 +52,13 @@ export async function loadProfile(): Promise<ProfileRow | null> {
  */
 export async function requireOnboarded(): Promise<ProfileRow> {
   const profile = await loadProfile();
-  if (!profile || profile.onboardingCompletedAt === null) {
+  if (
+    !profile ||
+    shouldGateToOnboarding({
+      authenticated: true,
+      onboardingCompletedAt: profile.onboardingCompletedAt,
+    })
+  ) {
     redirect("/onboarding");
   }
   return profile;
