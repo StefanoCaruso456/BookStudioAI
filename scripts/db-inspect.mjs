@@ -94,3 +94,5 @@ try {
 } finally {
   await sql.end({ timeout: 5 });
 }
+
+// re-run: verify fresh-user onboarding completion (Phase 2 acceptance)
