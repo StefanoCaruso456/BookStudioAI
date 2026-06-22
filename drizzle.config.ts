@@ -5,6 +5,7 @@ export default {
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? "",
+    // Use the public proxy URL (external connections); fall back to DATABASE_URL.
+    url: process.env.DATABASE_URL_PUBLIC ?? process.env.DATABASE_URL ?? "",
   },
 } satisfies Config;

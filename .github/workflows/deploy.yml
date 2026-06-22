@@ -5,17 +5,26 @@ name: Deploy (Production)
 # native Git integration) means the deploy's success or failure shows up as a
 # GitHub Actions run with full build logs, right alongside the test results.
 #
-# Requires three repository secrets (Settings -> Secrets and variables -> Actions):
+# Requires these repository secrets (Settings -> Secrets and variables -> Actions):
 #   VERCEL_TOKEN       - a Vercel access token (Vercel -> Account Settings -> Tokens)
 #   VERCEL_ORG_ID      - from .vercel/project.json after `vercel link`, or team settings
 #   VERCEL_PROJECT_ID  - from .vercel/project.json, or Project Settings -> General
+#   DATABASE_URL_PUBLIC - Railway PUBLIC proxy URL (also set in Vercel env)
 #
 # Vercel's own auto-deploy for `main` is disabled in vercel.json so the two
 # don't race / double-deploy. Preview deploys for PR branches are unaffected.
+#
+# Database migrations run as a serialized CI step BEFORE deploy (best practice
+# for serverless: never migrate at app boot — instances would race). Migrations
+# are additive/expand-contract, so applying schema ahead of the new code is the
+# safe ordering. The step is skipped until DATABASE_URL_PUBLIC is set, so it
+# can't break deploys before the DB is provisioned. Use the manual "Run workflow"
+# (workflow_dispatch) to baseline the schema once before the data cutover lands.
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 # Never let two production deploys run at once; newest push wins.
 concurrency:
@@ -25,6 +34,8 @@ concurrency:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  # Public Railway proxy URL — drizzle.config.ts reads DATABASE_URL_PUBLIC.
+  DATABASE_URL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
 
 jobs:
   deploy:
@@ -48,6 +59,13 @@ jobs:
 
       - name: Test
         run: npm test
+
+      # Apply committed Drizzle migrations before deploy. Skipped until
+      # DATABASE_URL is configured, so it never blocks a deploy prematurely.
+      # Idempotent: drizzle tracks applied migrations in __drizzle_migrations.
+      - name: Run database migrations
+        if: ${{ env.DATABASE_URL_PUBLIC != '' }}
+        run: npm run db:migrate
 
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
