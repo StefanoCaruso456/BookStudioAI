@@ -27,5 +27,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# drizzle
-/drizzle
+# drizzle — migrations are committed (source of truth, applied in CI).
+# Only ignore the local introspection/pull scratch dir.
+/drizzle/_pull
