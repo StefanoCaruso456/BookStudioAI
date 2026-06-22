@@ -424,3 +424,109 @@ export async function setPublishingKit(
     .set({ status: "publishing", updatedAt: ts })
     .where(eq(bookProjects.id, projectId));
 }
+
+/**
+ * One-time migration of a visitor's localStorage projects into their account
+ * (T10). Each project is re-created under fresh ids (so re-running can't
+ * collide), preserving chapter content/status, blueprint, sources, and kit.
+ * Returns the number of projects imported.
+ */
+export async function importProjects(
+  userId: string,
+  projects: BookProject[]
+): Promise<number> {
+  let imported = 0;
+  for (const p of projects) {
+    const projectId = uid("proj");
+    const createdAt = new Date(p.createdAt);
+    const ts = new Date();
+    const valid = (d: Date) => (Number.isNaN(d.getTime()) ? ts : d);
+
+    await db.transaction(async (tx) => {
+      await tx.insert(bookProjects).values({
+        id: projectId,
+        userId,
+        title: p.title || "Untitled Book",
+        bookType: p.bookType,
+        goal: p.goal,
+        audience: JSON.stringify(p.audience ?? { description: "" }),
+        initialPrompt: p.initialPrompt,
+        status: p.status,
+        genreData: p.genreData ?? {},
+        createdAt: valid(createdAt),
+        updatedAt: ts,
+      });
+
+      if (p.blueprint) {
+        const b = p.blueprint;
+        await tx.insert(bookBlueprints).values({
+          id: uid("bp"),
+          projectId,
+          titleOptionsJson: b.titleOptions,
+          subtitleOptionsJson: b.subtitleOptions,
+          bookPromise: b.bookPromise,
+          targetReader: b.targetReader,
+          tone: b.tone,
+          tableOfContentsJson: b.tableOfContents,
+          chapterSummariesJson: b.chapterSummaries,
+          estimatedLength: b.estimatedLength,
+          nextStepsJson: b.nextSteps,
+          approved: b.approved,
+          createdAt: ts,
+          updatedAt: ts,
+        });
+      }
+
+      if (p.chapters?.length) {
+        await tx.insert(chaptersTable).values(
+          p.chapters.map((c, i) => ({
+            id: uid("ch"),
+            projectId,
+            title: c.title,
+            summary: c.summary,
+            content: c.content,
+            orderIndex: c.orderIndex ?? i,
+            status: c.status,
+            createdAt: ts,
+            updatedAt: ts,
+          }))
+        );
+      }
+
+      if (p.sourceContent?.length) {
+        await tx.insert(sourceContentTable).values(
+          p.sourceContent.map((s) => ({
+            id: uid("src"),
+            projectId,
+            type: s.type,
+            title: s.title,
+            content: s.content,
+            metadataJson: s.metadata,
+            createdAt: ts,
+          }))
+        );
+      }
+
+      if (p.publishingKit) {
+        const k = p.publishingKit;
+        await tx.insert(publishingKits).values({
+          id: uid("kit"),
+          projectId,
+          finalTitle: k.finalTitle,
+          subtitle: k.subtitle,
+          authorBio: k.authorBio,
+          bookDescription: k.bookDescription,
+          backCoverCopy: k.backCoverCopy,
+          keywordsJson: k.keywords,
+          categorySuggestionsJson: k.categorySuggestions,
+          coverConceptsJson: k.coverConcepts,
+          kdpChecklistJson: k.kdpChecklist,
+          createdAt: ts,
+          updatedAt: ts,
+        });
+      }
+    });
+    imported += 1;
+  }
+  return imported;
+}

@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   ArrowLeft,
   Sparkles,
-  Loader2,
   FileText,
   BookOpen,
   Check,
@@ -19,42 +18,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { useStore, useHydrated } from "@/lib/store";
 import { generatePublishingKit, type PublishingKitDraft } from "@/lib/ai";
-import type { PublishingKit as PublishingKitType } from "@/types/book";
+import { setPublishingKitAction } from "@/lib/data/actions";
+import type {
+  BookProject,
+  PublishingKit as PublishingKitType,
+} from "@/types/book";
 import { cn } from "@/lib/utils";
 
-export function PublishingKit({ projectId }: { projectId: string }) {
-  const hydrated = useHydrated();
-  const project = useStore((s) => s.projects.find((p) => p.id === projectId));
-  const persistKit = useStore((s) => s.setPublishingKit);
-
+export function PublishingKit({ project }: { project: BookProject }) {
   const [kit, setKit] = useState<PublishingKitDraft | null>(
-    project?.publishingKit
-      ? stripKit(project.publishingKit)
-      : null
+    project.publishingKit ? stripKit(project.publishingKit) : null
   );
   const [authorName, setAuthorName] = useState("");
   const [generating, setGenerating] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
-
-  if (!hydrated) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center text-subtle">
-        <Loader2 className="h-5 w-5 animate-spin" />
-      </div>
-    );
-  }
-  if (!project) {
-    return (
-      <div className="mx-auto max-w-md px-6 py-20 text-center">
-        <p className="text-lg font-semibold">Project not found</p>
-        <Link href="/dashboard" className="mt-4 inline-block">
-          <Button variant="secondary">Back to dashboard</Button>
-        </Link>
-      </div>
-    );
-  }
 
   const bp = project.blueprint;
 
@@ -62,17 +40,17 @@ export function PublishingKit({ projectId }: { projectId: string }) {
     setGenerating(true);
     try {
       const result = await generatePublishingKit({
-        bookType: project!.bookType,
-        title: bp?.titleOptions[0] ?? project!.title,
+        bookType: project.bookType,
+        title: bp?.titleOptions[0] ?? project.title,
         subtitle: bp?.subtitleOptions[0] ?? "",
         bookPromise: bp?.bookPromise ?? "",
         targetReader: bp?.targetReader ?? "your readers",
         tone: bp?.tone ?? "Clear and warm",
         authorName,
-        goal: project!.goal,
+        goal: project.goal,
       });
       setKit(result);
-      persistKit(project!.id, result);
+      void setPublishingKitAction(project.id, result);
       setSavedAt(new Date().toLocaleTimeString());
     } finally {
       setGenerating(false);
@@ -84,7 +62,7 @@ export function PublishingKit({ projectId }: { projectId: string }) {
   }
   function save() {
     if (!kit) return;
-    persistKit(project!.id, kit);
+    void setPublishingKitAction(project.id, kit);
     setSavedAt(new Date().toLocaleTimeString());
   }
   function toggleCheck(i: number) {

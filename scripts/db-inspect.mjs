@@ -48,8 +48,7 @@ try {
   const acctCount = await sql`SELECT count(*)::int AS n FROM accounts`;
   console.log(`row count: ${acctCount[0].n}`);
   const accounts = await sql`
-    SELECT "userId" AS user_id, type, provider,
-           "providerAccountId" AS provider_account_id, scope
+    SELECT user_id, type, provider, provider_account_id, scope
     FROM accounts`;
   console.log(JSON.stringify(accounts, null, 2));
 
