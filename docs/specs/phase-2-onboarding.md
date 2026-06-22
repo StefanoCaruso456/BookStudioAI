@@ -26,14 +26,27 @@ Grounded in current (2025–26) SaaS onboarding best practice:
 - **Personalize to the persona's "aha".** Different segments activate on
   different actions; route each toward theirs.
 
-**Translation to Book Studio AI:** our "aha" is **generating the first
-blueprint**. So onboarding is a *short* self-segmentation survey (persona +
-goal + consent) that **pre-fills the builder** and drops the user straight into
-it — collecting trust/segmentation data while *shortening* time-to-aha, not
-lengthening it.
+**Fastest-growing AI products (Claude, ChatGPT, Base44, Lovable):** they onboard
+*minimally* — "value before explanation" (one teardown: +53% Day‑1 retention by
+prioritizing immediate value), with **one light self-segmentation question** and
+learn-by-doing. Base44/Lovable: a single "which role fits you best?" + consent,
+then into the product. Claude/ChatGPT: accept terms → straight to the chat.
 
-Sources: ProductLed, Appcues, Userpilot, Chameleon, Candu, Context.dev (2025
-onboarding guides) — see links in the chat summary.
+**Translation to Book Studio AI — what to add vs exclude (key platform call):**
+our builder *already* asks **book type** (step 1) and **goal** (step 2), so
+re-asking them in onboarding violates "don't ask twice."
+- **ADD:** persona/role (a *new* signal → personalization + segmentation),
+  legal consent (ToS/Privacy), optional "how did you hear about us" (attribution).
+- **EXCLUDE:** book type + goal (the builder owns them), company/team size
+  (B2C, single-user), long product tours.
+
+→ Our "aha" is **the first blueprint**. So onboarding is the *leanest* useful
+slice — **one persona tap + consent** — that pre-fills the builder's book type
+and drops the user straight into it: trust + segmentation data captured while
+*shortening* time-to-aha.
+
+Sources: ProductLed, Appcues, Userpilot, Chameleon, Candu, Maven (Claude vs
+ChatGPT onboarding teardown), WorkOS — see links in the chat summary.
 
 ---
 
@@ -91,11 +104,12 @@ ToS/Privacy acceptance is a legal record: store `(user_id, type, version,
 accepted_at)` immutably. Marketing opt-in (a *preference*, not a legal record)
 lives on `profiles` and can change.
 
-**ADR-4 · Lean self-segmentation: 3 quick steps, builder pre-fill.**
-Persona → Goal → Consent (with optional attribution). Research-backed sweet
-spot; maximizes completion and feeds personalization. _Rejected:_ minimal
-(consent-only — wastes the segmentation opportunity) and heavy 5+ step
-(kills completion).
+**ADR-4 · Leanest useful flow: persona + consent (NOT goal/book-type).**
+Two beats: (1) persona/role self-segmentation, (2) consent (+ optional
+attribution). We deliberately **exclude book type and goal** because the builder
+already collects them (no double-asking), matching the minimal onboarding of the
+fastest AI products. _Rejected:_ a 3–4 step survey (duplicates the builder, hurts
+completion) and consent-only (wastes the one cheap segmentation signal).
 
 **ADR-5 · Onboarding completion routes to a pre-filled builder.**
 On finish, redirect to `/builder` with the persona's book type pre-selected
@@ -169,23 +183,20 @@ Google sign-in (first time)
  │  │ Chef  │ │ Coach │ │Creator│ │Consult│     │
  │  └───────┘ └───────┘ └───────┘ └───────┘     │
  │  ┌───────┐ ┌───────┐ ┌───────┐               │
- │  │Founder│ │Author │ │ Other │   ● ○ ○       │
+ │  │Founder│ │Author │ │ Other │      ● ○      │
  │  └───────┘ └───────┘ └───────┘               │
+ │                            (single tap → next) │
  │                                              │
- │  STEP 2 — "What do you want to create?"      │
- │   ◦ Cookbook  ◦ Memoir  ◦ Self-help ...      │
- │   "Your main goal?"  ◦ Authority ◦ Teach ... │
- │                          (pre-selected from persona)   ○ ● ○ │
- │                                              │
- │  STEP 3 — "Almost there"                     │
+ │  STEP 2 — "One last thing"                   │
  │   [ ] I agree to the Terms & Privacy Policy  │  (required)
  │   [ ] Email me product tips (optional)       │
  │   (optional) How did you hear about us? [▼]  │
- │                              [ Start my book ] ○ ○ ●  │
+ │                              [ Start my book ]   ○ ●  │
  └─────────────────────────────────────────────┘
         │  save profile + consent_log + events('onboarding_completed')
         ▼
- /builder?type=<use_case>   (step 1 pre-selected → fast first blueprint = AHA)
+ /builder?type=<persona→bookType>   (step 1 pre-selected → fast blueprint = AHA)
+        (book type + goal are collected by the builder, not onboarding)
 ```
 
 Re-entry: visiting `/onboarding` when already completed → redirect `/dashboard`.
