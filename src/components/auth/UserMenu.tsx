@@ -30,7 +30,7 @@ export function UserMenu({ className }: { className?: string }) {
     return (
       <button
         type="button"
-        onClick={() => signIn("google")}
+        onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
         className={cn(
           "rounded-lg px-3 py-2 text-sm font-medium text-subtle transition-colors hover:text-ink",
           className
