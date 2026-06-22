@@ -224,11 +224,83 @@ export const subscriptions = pgTable(
   })
 );
 
+// ───────────────────────────── Profile & onboarding (Phase 2) ─────────────
+//
+// profiles is 1:1 with users (PK == FK, cascade). consent_log is an append-only
+// legal record (ToS/Privacy/marketing acceptance, versioned + timestamped).
+// events is a minimal first-party funnel table (PostHog-ready later). See
+// docs/specs/phase-2-onboarding.md (ADR-2/-3/-6).
+
+export const profiles = pgTable("profiles", {
+  // 1:1 with users — the user id IS the primary key (no surrogate).
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  persona: text("persona"), // chef|coach|creator|consultant|founder|author|other
+  primaryGoal: text("primary_goal"), // reuse BookGoal enum
+  useCase: text("use_case"), // intended book type (BookType)
+  referralSource: text("referral_source"), // attribution: how they heard
+  company: text("company"),
+  marketingOptIn: boolean("marketing_opt_in").notNull().default(false),
+  // NULL = not onboarded yet (the server-side gate, ADR-1).
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  locale: text("locale"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const consentLog = pgTable(
+  "consent_log",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(), // 'terms' | 'privacy' | 'marketing'
+    version: text("version").notNull(), // e.g. '2026-06-01'
+    acceptedAt: timestamp("accepted_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    userIdx: index("consent_log_user_idx").on(t.userId),
+  })
+);
+
+export const events = pgTable(
+  "events",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    props: jsonb("props").$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    userIdx: index("events_user_idx").on(t.userId),
+    nameCreatedIdx: index("events_name_created_idx").on(t.name, t.createdAt),
+  })
+);
+
 // ───────────────────────────── Relations ──────────────────────────────────
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   projects: many(bookProjects),
   accounts: many(accounts),
+  profile: one(profiles, {
+    fields: [users.id],
+    references: [profiles.userId],
+  }),
+}));
+
+export const profilesRelations = relations(profiles, ({ one }) => ({
+  user: one(users, { fields: [profiles.userId], references: [users.id] }),
+}));
+
+export const consentLogRelations = relations(consentLog, ({ one }) => ({
+  user: one(users, { fields: [consentLog.userId], references: [users.id] }),
+}));
+
+export const eventsRelations = relations(events, ({ one }) => ({
+  user: one(users, { fields: [events.userId], references: [users.id] }),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
