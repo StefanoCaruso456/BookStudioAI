@@ -215,10 +215,17 @@ export const subscriptions = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    // 'free' | 'pro' (Phase 5, ADR-1). Written only by verified webhooks.
     plan: text("plan").notNull().default("free"),
+    // 'active' | 'trialing' | 'past_due' | 'canceled' | 'inactive'
     status: text("status").notNull().default("inactive"),
     stripeCustomerId: text("stripe_customer_id"),
     stripeSubscriptionId: text("stripe_subscription_id"),
+    // Stripe state projection (Phase 5): which price, when the paid period ends,
+    // and whether Stripe will cancel at period end (Portal "cancel" sets this).
+    priceId: text("price_id"),
+    currentPeriodEnd: timestamp("current_period_end"),
+    cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

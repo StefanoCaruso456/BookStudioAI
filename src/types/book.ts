@@ -27,7 +27,15 @@ export type ChapterStatus =
   | "needs_review"
   | "complete";
 
-export type SubscriptionPlan = "free" | "weekly" | "monthly";
+export type SubscriptionPlan = "free" | "pro";
+
+/** Stripe-synced subscription status (Phase 5). */
+export type SubscriptionStatus =
+  | "active"
+  | "trialing"
+  | "past_due"
+  | "canceled"
+  | "inactive";
 
 export type ProjectStatus =
   | "draft"
@@ -138,9 +146,12 @@ export interface Subscription {
   id: string;
   userId: string;
   plan: SubscriptionPlan;
-  status: "active" | "inactive" | "trialing";
+  status: SubscriptionStatus;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
+  priceId?: string;
+  currentPeriodEnd?: string;
+  cancelAtPeriodEnd: boolean;
   createdAt: string;
   updatedAt: string;
 }
