@@ -5,6 +5,14 @@
   **What · Why · Purpose · Outcome · Value** (one block per merge). This is a
   standing rule — no exceptions.
 
+## Git process
+- **No direct commits to `main`** unless the user explicitly approves it as an
+  emergency production hotfix. Normal flow is:
+  **branch → validated fix → PR → review → merge → deploy → production
+  acceptance test.**
+- A change isn't "done" until its **production acceptance test passes**, not
+  just when CI is green.
+
 ## Engineering conventions
 - Plan PM-first per phase: spec under `docs/specs/` (research → ADRs → data model
   → flow → wireframes → user stories → tasks → DoD) and get approval before build.
