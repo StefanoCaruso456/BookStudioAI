@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { ArrowLeft, ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,14 +13,21 @@ import { SourceContentUploader } from "./SourceContentUploader";
 import { GenreSpecificForm } from "./GenreSpecificForm";
 import { BlueprintPreview } from "./BlueprintPreview";
 import { PRIMARY_GENRES, getGenre } from "@/lib/genres";
-import { useStore, useHydrated } from "@/lib/store";
+import { useStore, useHydrated, type BuilderDraft } from "@/lib/store";
+import { useAutosave } from "@/lib/useAutosave";
 import { generateBookBlueprint, type BlueprintDraft } from "@/lib/ai";
-import { createProjectAction } from "@/lib/data/actions";
+import { createProjectAction, saveBuilderDraftAction } from "@/lib/data/actions";
 import type { BookType } from "@/types/book";
 
 const STEPS = ["Book Type", "Goal", "Audience", "Source", "Details", "Blueprint"];
 
-export function BookBuilderWizard() {
+export function BookBuilderWizard({
+  serverDraft,
+  serverBlueprint,
+}: {
+  serverDraft?: Partial<BuilderDraft> | null;
+  serverBlueprint?: BlueprintDraft | null;
+} = {}) {
   const router = useRouter();
   const hydrated = useHydrated();
   const { status } = useSession();
@@ -37,6 +44,51 @@ export function BookBuilderWizard() {
   const [approving, setApproving] = useState(false);
 
   const genre = getGenre(draft.bookType);
+
+  // Server-persisted draft (ADR-3): debounced upsert so an in-progress setup
+  // survives across devices. localStorage (the Zustand persist) stays as cache.
+  const draftSaver = useAutosave<{
+    draft: Record<string, unknown>;
+    blueprint: Record<string, unknown> | null;
+  }>(({ draft: d, blueprint: bp }) => saveBuilderDraftAction(d, bp));
+  // Gate persistence until after the one-time hydrate/import has run, so we
+  // don't immediately overwrite the server with a half-hydrated local store.
+  const synced = useRef(false);
+
+  // One-time on mount (per ADR-3): if the server has a draft, hydrate the local
+  // store from it (server is the source of truth). If not, but a local draft
+  // exists, push the local one up. After this, edits persist back debounced.
+  useEffect(() => {
+    if (!hydrated || synced.current) return;
+    if (!authed) {
+      // Anonymous visitor: localStorage cache only, nothing to sync.
+      synced.current = true;
+      return;
+    }
+
+    if (serverDraft) {
+      setDraft(serverDraft);
+      if (serverBlueprint) setBlueprint(serverBlueprint);
+    } else if (hasLocalDraft(draft)) {
+      void saveBuilderDraftAction(
+        draft as unknown as Record<string, unknown>,
+        (draft.blueprint as BlueprintDraft | null) ?? null
+      );
+    }
+    synced.current = true;
+    // run once after hydration
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, authed]);
+
+  // Persist draft changes back to the server (debounced) once synced.
+  useEffect(() => {
+    if (!synced.current || !authed) return;
+    draftSaver.schedule({
+      draft: draft as unknown as Record<string, unknown>,
+      blueprint: (draft.blueprint as Record<string, unknown> | null) ?? null,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft]);
 
   // Returning from the sign-in redirect (?resume=1): restore the blueprint the
   // visitor built before signing in and drop them back on the review step.
@@ -247,6 +299,18 @@ export function BookBuilderWizard() {
         )}
       </Card>
     </div>
+  );
+}
+
+/** True when the local draft holds meaningful, user-entered work worth syncing. */
+function hasLocalDraft(draft: BuilderDraft): boolean {
+  return (
+    !!draft.goal ||
+    draft.audience.description.trim().length > 0 ||
+    draft.sourceContent.length > 0 ||
+    Object.keys(draft.genreData).length > 0 ||
+    draft.initialPrompt.trim().length > 0 ||
+    !!draft.blueprint
   );
 }
 

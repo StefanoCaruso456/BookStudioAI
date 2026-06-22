@@ -15,6 +15,13 @@
       "when": 1782102266517,
       "tag": "0001_phase2_profiles_consent_events",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782107043959,
+      "tag": "0002_phase3_builder_drafts_resume",
+      "breakpoints": true
     }
   ]
 }
