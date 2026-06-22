@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { ArrowLeft, ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,6 +22,8 @@ const STEPS = ["Book Type", "Goal", "Audience", "Source", "Details", "Blueprint"
 export function BookBuilderWizard() {
   const router = useRouter();
   const hydrated = useHydrated();
+  const { status } = useSession();
+  const authed = status === "authenticated";
 
   const draft = useStore((s) => s.draft);
   const setDraft = useStore((s) => s.setDraft);
@@ -35,6 +38,21 @@ export function BookBuilderWizard() {
   const [approving, setApproving] = useState(false);
 
   const genre = getGenre(draft.bookType);
+
+  // Returning from the sign-in redirect (?resume=1): restore the blueprint the
+  // visitor built before signing in and drop them back on the review step.
+  useEffect(() => {
+    if (!hydrated) return;
+    const resume =
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("resume") === "1";
+    if (resume && draft.blueprint) {
+      setBlueprint(draft.blueprint);
+      setStep(5);
+    }
+    // run once after hydration
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
 
   function changeBookType(type: BookType) {
     if (type === draft.bookType) return;
@@ -54,6 +72,8 @@ export function BookBuilderWizard() {
         initialPrompt: draft.initialPrompt,
       });
       setBlueprint(bp);
+      // Persist so the visitor's work survives a sign-in redirect at approve.
+      setDraft({ blueprint: bp });
     } finally {
       setGenerating(false);
       setRegenerating(false);
@@ -75,6 +95,14 @@ export function BookBuilderWizard() {
 
   async function approve() {
     if (!blueprint) return;
+    // Action gate: a visitor can build the whole blueprint freely, but saving
+    // it requires an account. Stash the work and route through Google sign-in;
+    // ?resume=1 brings them straight back to this review step afterward.
+    if (!authed) {
+      setDraft({ blueprint });
+      void signIn("google", { callbackUrl: "/builder?resume=1" });
+      return;
+    }
     setApproving(true);
     const project = createProject(blueprint);
     approveBlueprint(project.id);
@@ -178,6 +206,7 @@ export function BookBuilderWizard() {
                 onRegenerate={() => runGenerate(true)}
                 regenerating={regenerating}
                 approving={approving}
+                authed={authed}
               />
             ))}
         </div>

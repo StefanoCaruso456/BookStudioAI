@@ -11,6 +11,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { useEffect, useState } from "react";
 import { uid, nowIso } from "@/lib/utils";
+import type { BlueprintDraft } from "@/lib/ai";
 import type {
   BookProject,
   BookType,
@@ -30,6 +31,9 @@ export interface BuilderDraft {
   audience: Audience;
   genreData: Record<string, string>;
   sourceContent: SourceContent[];
+  /** The last generated blueprint, kept so an unauthenticated visitor's work
+   *  survives the sign-in redirect (see the builder's auth gate). */
+  blueprint?: BlueprintDraft | null;
 }
 
 function emptyDraft(bookType: BookType = "cookbook"): BuilderDraft {
@@ -40,6 +44,7 @@ function emptyDraft(bookType: BookType = "cookbook"): BuilderDraft {
     audience: { description: "" },
     genreData: {},
     sourceContent: [],
+    blueprint: null,
   };
 }
 
