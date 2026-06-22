@@ -16,10 +16,13 @@ export function SettingsForm({
   persona,
   primaryGoal,
   marketingOptIn,
+  children,
 }: {
   persona: string | null;
   primaryGoal: string | null;
   marketingOptIn: boolean;
+  /** Extra sections rendered below the profile card (e.g. Billing, Phase 5). */
+  children?: React.ReactNode;
 }) {
   const [personaValue, setPersonaValue] = useState<string>(persona ?? "");
   const [goalValue, setGoalValue] = useState<string>(primaryGoal ?? "");
@@ -121,6 +124,8 @@ export function SettingsForm({
           )}
         </div>
       </Card>
+
+      {children}
     </main>
   );
 }
